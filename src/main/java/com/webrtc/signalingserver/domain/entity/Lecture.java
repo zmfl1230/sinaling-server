@@ -1,4 +1,4 @@
-package com.webrtc.signalingserver;
+package com.webrtc.signalingserver.domain.entity;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.webrtc.signalingserver.dto;
+package com.webrtc.signalingserver.domain.dto;
 
 import javax.validation.constraints.NotEmpty;
 

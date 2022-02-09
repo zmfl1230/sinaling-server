@@ -1,4 +1,8 @@
-package com.webrtc.signalingserver;
+package com.webrtc.signalingserver.exception;
+
+import com.webrtc.signalingserver.domain.entity.Lecture;
+import com.webrtc.signalingserver.domain.entity.Member;
+
 public class ValidatePermission {
 
     public static void validateLecturer(Long lecturerId, Lecture lecture) {

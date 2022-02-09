@@ -1,7 +1,10 @@
-package com.webrtc.signalingserver;
+package com.webrtc.signalingserver.service;
 
 import com.google.gson.Gson;
-import com.webrtc.signalingserver.dto.LiveRequestDto;
+import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
+import com.webrtc.signalingserver.domain.entity.Lecture;
+import com.webrtc.signalingserver.domain.entity.Member;
+import com.webrtc.signalingserver.exception.ValidatePermission;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.springframework.beans.factory.annotation.Autowired;

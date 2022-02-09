@@ -1,7 +1,7 @@
 package com.webrtc.signalingserver;
 
 import com.google.gson.Gson;
-import com.webrtc.signalingserver.dto.LiveRequestDto;
+import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
