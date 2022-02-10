@@ -1,6 +1,10 @@
 package com.webrtc.signalingserver.config;
 
 import com.webrtc.signalingserver.LectureSession;
+import com.webrtc.signalingserver.repository.MemoryRepository;
+import com.webrtc.signalingserver.repository.MemorySessionRepository;
+import com.webrtc.signalingserver.repository.ObjectRepository;
+import com.webrtc.signalingserver.repository.SessionRepository;
 import com.webrtc.signalingserver.service.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +26,16 @@ public class SessionConfig {
 
     @Bean
     WebSocketService webSocketService() {
-        return new WebSocketService();
+        return new WebSocketService(objectRepository(), sessionRepository());
     }
+
+    @Bean
+    public ObjectRepository objectRepository() {
+        return new MemoryRepository();
+    }
+
+    @Bean
+    public SessionRepository sessionRepository() {return new MemorySessionRepository();}
 
     @PostConstruct
     public void startLectureSession() {
