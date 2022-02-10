@@ -1,7 +1,9 @@
 package com.webrtc.signalingserver.domain.dto;
 
+import lombok.Builder;
 import javax.validation.constraints.NotEmpty;
 
+@Builder
 public class LiveRequestDto {
 
     @NotEmpty
