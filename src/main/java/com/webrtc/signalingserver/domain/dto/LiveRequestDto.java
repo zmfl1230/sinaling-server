@@ -18,4 +18,18 @@ public class LiveRequestDto {
     public String token;
 
     public SdpDto sdp;
+
+    public static LiveRequestDto buildBasicDto(String type, Long userId, Long lectureId, String token) {
+        LiveRequestDtoBuilder liveRequestDtoBuilder = LiveRequestDto
+                .builder()
+                .type(type)
+                .userId(userId)
+                .lectureId(lectureId);
+
+        if(token != null) liveRequestDtoBuilder.token(token);
+        return liveRequestDtoBuilder
+                .build();
+
+    }
+
 }

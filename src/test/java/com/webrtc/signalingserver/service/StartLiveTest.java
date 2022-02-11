@@ -76,12 +76,7 @@ public class StartLiveTest {
         objectRepository.saveMember(teacher);
         objectRepository.saveLecture(lecture);
 
-        LiveRequestDto startLive = LiveRequestDto
-                .builder()
-                .type("startLive")
-                .userId(teacher.getId())
-                .lectureId(lecture.getId())
-                .build();
+        LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher.getId(), lecture.getId(), null);
 
         //when
         webSocketService.startLive(client.getConnection(), startLive);
@@ -91,47 +86,32 @@ public class StartLiveTest {
 
     @Test
     @DisplayName("강의자가 본인강의가 아닌 강의 라이브 시작 -> IllegalArgumentException")
-    public void startLiveByWrongLecturer() throws Exception {
+    public void startLiveByWrongLecturer() {
 
         //Given
         objectRepository.saveMember(teacher);
         objectRepository.saveMember(teacher1);
         objectRepository.saveLecture(lecture);
 
-        LiveRequestDto startLive = LiveRequestDto
-                .builder()
-                .type("startLive")
-                .userId(teacher1.getId())
-                .lectureId(lecture.getId())
-                .build();
+        LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher1.getId(), lecture.getId(), null);
 
         //Then
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            webSocketService.startLive(client.getConnection(), startLive);
-        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.startLive(client.getConnection(), startLive));
 
     }
 
     @Test
     @DisplayName("강의자가 아닌 학생이 라이브 시작 -> IllegalArgumentException")
-    public void startLiveByStudent() throws Exception {
+    public void startLiveByStudent() {
 
         //Given
         objectRepository.saveMember(teacher);
         objectRepository.saveMember(student1);
         objectRepository.saveLecture(lecture);
 
-        LiveRequestDto startLive = LiveRequestDto
-                .builder()
-                .type("startLive")
-                .userId(student1.getId())
-                .lectureId(lecture.getId())
-                .build();
-
+        LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher1.getId(), lecture.getId(), null);
         //Then
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            webSocketService.startLive(client.getConnection(), startLive);
-        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.startLive(client.getConnection(), startLive));
 
     }
 
@@ -142,13 +122,7 @@ public class StartLiveTest {
         objectRepository.saveMember(teacher);
         objectRepository.saveLecture(lecture);
 
-        LiveRequestDto startLive = LiveRequestDto
-                .builder()
-                .type("startLive")
-                .userId(teacher.getId())
-                .lectureId(lecture.getId())
-                .build();
-
+        LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher.getId(), lecture.getId(), null);
         //when
         webSocketService.startLive(client.getConnection(), startLive);
 
