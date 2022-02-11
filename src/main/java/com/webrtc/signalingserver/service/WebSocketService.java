@@ -1,12 +1,12 @@
 package com.webrtc.signalingserver.service;
 
-import com.google.gson.Gson;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
 import com.webrtc.signalingserver.exception.ValidatePermission;
 import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
+import com.webrtc.signalingserver.util.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import java.util.Map;
@@ -29,7 +29,9 @@ public class WebSocketService {
         ValidatePermission.validateLecturer(messageObj.userId, lecture);
         startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-//        socket.send("라이브 생성 성공");
+        GsonUtil.commonSendMessage(socket, messageObj.userId,
+                "라이브 생성 성공");
+
         log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
     }
 
@@ -40,7 +42,9 @@ public class WebSocketService {
         ValidatePermission.validateAccessPermission(member, lectureToEnter);
         enterLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-//        socket.send("라이브 입장");
+        GsonUtil.commonSendMessage(socket, messageObj.userId,
+                "라이브 입장");
+
         log.info("라이브 입장 성공, {}", socket.getRemoteSocketAddress());
 
         sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s님이 입장하셨습니다.", member.getName()));
@@ -78,15 +82,14 @@ public class WebSocketService {
                 socket.send(sessionRepository.getMessageOnMessageOffer(target));
             }
         }
+
+        GsonUtil.commonSendMessage(socket, messageObj.userId,
+                "sdp 전송");
     }
 
     public void answer(WebSocket socket, LiveRequestDto messageObj, String message) {
-
-        // Gson 객체 생성
-        Gson gson = new Gson();
-
         // Json 문자열 -> Map
-        Map<String, Object> map = gson.fromJson(message, Map.class);
+        Map<String, Object> map = GsonUtil.decode(message, Map.class);
         if(map.containsKey("sender") && map.get("sender") instanceof Long) {
             String encryptedSender = convertedToEncryption(messageObj.lectureId, (Long) map.get("sender"));
             if(sessionRepository.containsKeyOnConnections(encryptedSender))
@@ -95,6 +98,9 @@ public class WebSocketService {
         else {
             sendToAll(messageObj.lectureId, messageObj.userId, message);
         }
+
+        GsonUtil.commonSendMessage(socket, messageObj.userId,
+                "sdp 전송");
     }
 
     public void exitLive(WebSocket socket, LiveRequestDto messageObj) {
@@ -120,6 +126,10 @@ public class WebSocketService {
              sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s 님이 라이브 강의를 나갔습니다.", messageObj.userId));
         }
         log.info("client exited: {}", messageObj.userId);
+
+
+        GsonUtil.commonSendMessage(socket, messageObj.userId,
+                "강의 종료");
     }
 
 
