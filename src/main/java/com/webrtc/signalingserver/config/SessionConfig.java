@@ -40,6 +40,7 @@ public class SessionConfig {
     @PostConstruct
     public void startLectureSession() {
         this.lectureSession().start();
+        this.lectureSession().setWebSocketService(webSocketService());
         this.lectureSession().setMethodMap(lectureSessionInit());
         log.info("소켓 서버가 시작됩니다. port: {}", this.lectureSession().getPort());
     }

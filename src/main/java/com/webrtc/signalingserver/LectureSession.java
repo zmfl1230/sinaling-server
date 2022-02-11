@@ -2,6 +2,7 @@ package com.webrtc.signalingserver;
 
 import com.google.gson.Gson;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
+import com.webrtc.signalingserver.service.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -15,10 +16,15 @@ import java.util.*;
 public class LectureSession extends WebSocketServer {
 
     private Map<String, Method> methodMap = new HashMap<>();
+    private WebSocketService webSocketService;
 
     public LectureSession() {
         super(new InetSocketAddress(8888));
         log.info("소켓 시작");
+    }
+
+    public void setWebSocketService(WebSocketService webSocketService) {
+        this.webSocketService = webSocketService;
     }
 
     public void setMethodMap(Map<String, Method> methodMap) {
@@ -41,18 +47,15 @@ public class LectureSession extends WebSocketServer {
 
             if(messageObj.type.equalsIgnoreCase("sdp")) {
                 // sdp [offer, answer]
-                methodMap.get(messageObj.type).invoke(this, conn, messageObj, message);
+                methodMap.get((messageObj.type).toLowerCase()).invoke(webSocketService, conn, messageObj, message);
             } else {
                 // start, enter, exit
-                methodMap.get(messageObj.type).invoke(this, conn, messageObj);
+                methodMap.get((messageObj.type).toLowerCase()).invoke(webSocketService, conn, messageObj);
             }
 
         } catch (IllegalAccessException | InvocationTargetException | NullPointerException e) {
-            log.info(e.getMessage());
-        } finally {
-            conn.close();
+            log.info(e.toString());
         }
-
     }
 
     @Override
