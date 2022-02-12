@@ -124,6 +124,8 @@ public class WebSocketService {
         // 수강생 강의 종료
         else {
              String encryptedUser = convertedToEncryption(messageObj.lectureId, messageObj.userId);
+            if(sessionRepository.containsConnectionOnLectureSession(changeLongToString(messageObj.lectureId), encryptedUser))
+                throw new IllegalArgumentException("접속 정보가 없는 사용자입니다.");
              removeConnections(encryptedUser);
              sessionRepository.removeSessionOnLecture(changeLongToString(lecture.getId()), encryptedUser);
              sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s 님이 라이브 강의를 나갔습니다.", messageObj.userId));

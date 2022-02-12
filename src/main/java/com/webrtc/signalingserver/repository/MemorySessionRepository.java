@@ -83,6 +83,11 @@ public class MemorySessionRepository implements SessionRepository{
     }
 
     @Override
+    public Boolean containsConnectionOnLectureSession(String lectureId, String key) {
+        return sessionManager.get(lectureId).contains(key);
+    }
+
+    @Override
     public List<String> getSessionsByLectureId(String lectureId) {
         return sessionManager.get(lectureId);
     }
