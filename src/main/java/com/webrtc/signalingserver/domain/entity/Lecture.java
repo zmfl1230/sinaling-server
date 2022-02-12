@@ -1,6 +1,7 @@
 package com.webrtc.signalingserver.domain.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 public class Lecture {
 
     @Id @GeneratedValue
@@ -21,6 +23,11 @@ public class Lecture {
 
     @ManyToMany
     private List<Member> students = new ArrayList<>();
+
+    public Lecture(Long id, Member lecturer) {
+        this.id = id;
+        this.lecturer = lecturer;
+    }
 
     public Boolean contains(Member student) {
         return students.contains(student);

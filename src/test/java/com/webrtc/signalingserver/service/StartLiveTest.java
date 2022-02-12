@@ -23,12 +23,10 @@ import static org.assertj.core.api.Assertions.*;
 public class StartLiveTest {
 
 
-    private WebSocketClient client;
-
-
-    ObjectRepository objectRepository = new MemoryRepository();
-    SessionRepository sessionRepository = new MemorySessionRepository();
-    WebSocketService webSocketService = new WebSocketService(objectRepository, sessionRepository);
+    WebSocketClient client;
+    ObjectRepository objectRepository;
+    SessionRepository sessionRepository;
+    WebSocketService webSocketService;
 
     Member teacher;
     Member teacher1;
@@ -41,28 +39,16 @@ public class StartLiveTest {
     public void setUpObject() {
         client = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
 
-        teacher = new Member();
-        teacher.setId(1L);
-        teacher.setName("teacher");
-        teacher.setRole(MemberRole.LECTURER);
+        objectRepository = new MemoryRepository();
+        sessionRepository = new MemorySessionRepository();
+        webSocketService = new WebSocketService(objectRepository, sessionRepository);
 
-        teacher1 = new Member();
-        teacher1.setId(4L);
-        teacher1.setName("teacher1");
-        teacher1.setRole(MemberRole.LECTURER);
+        teacher = new Member(1L, "teacher", MemberRole.LECTURER);
+        teacher1 = new Member(4L, "teacher1", MemberRole.LECTURER);
+        student1 = new Member(2L, "student1", MemberRole.STUDENT);
 
-        student1 = new Member();
-        student1.setId(2L);
-        student1.setName("student1");
-        student1.setRole(MemberRole.STUDENT);
-
-        lecture = new Lecture();
-        lecture.setId(1L);
-        lecture.setLecturer(teacher);
-
-        lecture1 = new Lecture();
-        lecture1.setId(2L);
-        lecture1.setLecturer(teacher1);
+        lecture = new Lecture(1L, teacher);
+        lecture1 = new Lecture(2L, teacher1);
         lecture1.getStudents().add(student1);
     }
 
