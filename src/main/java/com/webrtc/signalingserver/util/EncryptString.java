@@ -37,7 +37,7 @@ public class EncryptString {
             throw new RuntimeException(e);
         }
     }
-
+    // order: Lecture, Memeber
     public static String convertedToEncryption(Long arg1, Long arg2) {
         String s = changeLongToString(arg1, arg2);
         return encryptThisString(s);
