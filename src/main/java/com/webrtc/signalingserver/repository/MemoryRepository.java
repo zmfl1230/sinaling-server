@@ -13,12 +13,12 @@ public class MemoryRepository implements ObjectRepository {
 
     @Override
     public void saveLecture(Lecture lecture) {
-        lectures.put((long) (lectures.size()+1), lecture);
+        lectures.put(lecture.getId(), lecture);
     }
 
     @Override
     public void saveMember(Member member) {
-        members.put((long) (members.size()+1), member);
+        members.put(member.getId(), member);
     }
 
     @Override
