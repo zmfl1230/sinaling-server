@@ -46,7 +46,6 @@ public class WebSocketService {
                 "라이브 입장");
 
         log.info("라이브 입장 성공, {}", socket.getRemoteSocketAddress());
-
         sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s님이 입장하셨습니다.", member.getName()));
     }
 
@@ -154,11 +153,10 @@ public class WebSocketService {
 
     private void enterLiveLecture(Long lectureId, Long userId, WebSocket conn) {
         String lectureToString = changeLongToString(lectureId);
-        if(!sessionRepository.containsKeyOnConnections(lectureToString)) throw new IllegalArgumentException("현재 진행하지 않는 강의입니다.");
+        if(!sessionRepository.containsLectureSessionOnSessionManager(lectureToString)) throw new IllegalArgumentException("현재 진행하지 않는 강의입니다.");
 
         String changedValue = convertedToEncryption(lectureId, userId);
         sessionRepository.addSessionOnLecture(lectureToString, changedValue);
-
         sessionRepository.addWebSocketOnConnections(changedValue, conn);
         log.info("강의 세션에 참가하였습니다");
     }
