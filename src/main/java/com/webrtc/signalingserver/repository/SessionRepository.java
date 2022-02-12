@@ -19,6 +19,7 @@ public interface SessionRepository {
     void removeMessageOnMessageOffer(String key);
 
     // sessionManager
+    Boolean containsLectureSessionOnSessionManager(String key);
     List<String> getSessionsByLectureId(String lectureId);
     void addLectureSession(String lectureId);
     void removeLectureSessionByLectureId(String lectureId);

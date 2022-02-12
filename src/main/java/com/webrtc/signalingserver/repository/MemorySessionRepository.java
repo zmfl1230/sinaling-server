@@ -1,6 +1,7 @@
 package com.webrtc.signalingserver.repository;
 
 import org.java_websocket.WebSocket;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,7 +35,11 @@ public class MemorySessionRepository implements SessionRepository{
 
     @Override
     public void sendMessageUsingConnectionKey(String key, String message) {
-        connections.get(key).send(message);
+        try {
+            connections.get(key).send(message);
+        } catch (WebsocketNotConnectedException e) {
+            System.out.println("e = " + e);
+        }
     }
 
     @Override
@@ -65,6 +70,11 @@ public class MemorySessionRepository implements SessionRepository{
     @Override
     public void removeSessionOnLecture(String lectureId, String targetToRemove) {
         sessionManager.get(lectureId).remove(targetToRemove);
+    }
+
+    @Override
+    public Boolean containsLectureSessionOnSessionManager(String key) {
+        return sessionManager.containsKey(key);
     }
 
     @Override
