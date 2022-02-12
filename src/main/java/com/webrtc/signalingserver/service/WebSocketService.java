@@ -30,8 +30,8 @@ public class WebSocketService {
         ValidatePermission.validateLecturer(messageObj.userId, lecture);
         startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        GsonUtil.commonSendMessage(socket, messageObj.userId,
-                "라이브 생성 성공");
+        GsonUtil.commonSendMessage(socket, "startLive", messageObj.userId,
+                200);
 
         log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
     }
@@ -43,8 +43,8 @@ public class WebSocketService {
         ValidatePermission.validateAccessPermission(member, lectureToEnter);
         enterLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        GsonUtil.commonSendMessage(socket, messageObj.userId,
-                "라이브 입장");
+        GsonUtil.commonSendMessage(socket, "enterLive", messageObj.userId,
+                200);
 
         log.info("라이브 입장 성공, {}", socket.getRemoteSocketAddress());
         sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s님이 입장하셨습니다.", member.getName()));
@@ -83,8 +83,8 @@ public class WebSocketService {
             }
         }
 
-        GsonUtil.commonSendMessage(socket, messageObj.userId,
-                "sdp 전송");
+        GsonUtil.commonSendMessage(socket, "sdp", messageObj.userId,
+                200);
     }
 
     public void answer(WebSocket socket, LiveRequestDto messageObj, String message) {
@@ -99,8 +99,8 @@ public class WebSocketService {
             sendToAll(messageObj.lectureId, messageObj.userId, message);
         }
 
-        GsonUtil.commonSendMessage(socket, messageObj.userId,
-                "sdp 전송");
+        GsonUtil.commonSendMessage(socket, "sdp",messageObj.userId,
+                200);
     }
 
     public void exitLive(WebSocket socket, LiveRequestDto messageObj) {
@@ -133,8 +133,8 @@ public class WebSocketService {
         log.info("client exited: {}", messageObj.userId);
 
 
-        GsonUtil.commonSendMessage(socket, messageObj.userId,
-                "강의 종료");
+        GsonUtil.commonSendMessage(socket, "exitLive", messageObj.userId,
+                200);
     }
 
 

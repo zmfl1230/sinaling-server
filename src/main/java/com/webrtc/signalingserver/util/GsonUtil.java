@@ -19,12 +19,11 @@ public class GsonUtil{
         return gson.toJson(request);
     }
 
-    public static void commonSendMessage(WebSocket socket, Long userId, String message) {
+    public static void commonSendMessage(WebSocket socket, String type, Long userId, int status) {
 
-        System.out.println("socket = " + socket.getLocalSocketAddress());
-        System.out.println("socket = " + socket.getRemoteSocketAddress());
         JsonObject jsonobject = new JsonObject();
-        jsonobject.addProperty("message", message);
+        jsonobject.addProperty("type", type);
+        jsonobject.addProperty("status", status);
         jsonobject.addProperty("requester", userId);
 
         try {
