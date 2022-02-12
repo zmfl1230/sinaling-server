@@ -3,6 +3,7 @@ package com.webrtc.signalingserver.service;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
+import com.webrtc.signalingserver.domain.entity.MemberRole;
 import com.webrtc.signalingserver.exception.ValidatePermission;
 import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
@@ -104,12 +105,15 @@ public class WebSocketService {
 
     public void exitLive(WebSocket socket, LiveRequestDto messageObj) {
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
+        Member member = objectRepository.findMember(messageObj.userId);
 
-        // TODO: 잘못된 사용자 요청 검증
-        // if(member == null || lecture == null)
+        // 해당 멤버가 lecture 관련 회원인지 검증(강의자, 수강자)
+        ValidatePermission.validateAccessPermission(member, lecture);
 
         // 강사의 강의 종료
-        if(lecture.getLecturer().getId().equals(messageObj.userId)) {
+        if(member.getRole() == MemberRole.LECTURER && !lecture.contains(member)) {
+            // 강사와 요청 멤버가 동일한 인물인지 검증
+            ValidatePermission.validateLecturer(member.getId(), lecture);
             // sessionManager 돌면서 현재 session에 참여하고 있는 user 탐색
             String lectureToString = changeLongToString(lecture.getId());
             for (String needToRemove : sessionRepository.getSessionsByLectureId(lectureToString)) {
