@@ -68,6 +68,11 @@ public class MemorySessionRepository implements SessionRepository{
     }
 
     @Override
+    public Boolean containsKeyOnMessageOffer(String key) {
+        return messageOffer.containsKey(key);
+    }
+
+    @Override
     public void removeSessionOnLecture(String lectureId, String targetToRemove) {
         sessionManager.get(lectureId).remove(targetToRemove);
     }

@@ -15,6 +15,7 @@ public interface SessionRepository {
 
     // messageOffer
     String getMessageOnMessageOffer(String key);
+    Boolean containsKeyOnMessageOffer(String key);
     void addMessageOnMessageOffer(String key, String message);
     void removeMessageOnMessageOffer(String key);
 
