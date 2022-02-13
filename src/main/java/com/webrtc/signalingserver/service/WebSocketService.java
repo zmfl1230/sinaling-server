@@ -27,7 +27,10 @@ public class WebSocketService {
 
     public void isLiveProceeding(WebSocket socket, LiveRequestDto messageObj) {
         boolean proceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(messageObj.lectureId));
-        GsonUtil.sendLiveStatusMessage(socket, "isLiveProceeding", messageObj.userId, 200, proceeding);
+
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("isLiveProceeding", messageObj.userId, 200);
+        objectMap.put("proceeding", proceeding);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
         log.info("라이브 진행 여부 발송 성공 proceeding: {}",proceeding);
     }
@@ -67,8 +70,9 @@ public class WebSocketService {
         ValidatePermission.validateLecturer(messageObj.userId, lecture);
         startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        GsonUtil.commonSendMessage(socket, "startLive", messageObj.userId,
-                200);
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("startLive", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
+
 
         log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
     }
@@ -80,8 +84,8 @@ public class WebSocketService {
         ValidatePermission.validateAccessPermission(member, lectureToEnter);
         enterLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        GsonUtil.commonSendMessage(socket, "enterLive", messageObj.userId,
-                200);
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("enterLive", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
         log.info("라이브 입장 성공, {}", socket.getRemoteSocketAddress());
         sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s님이 입장하셨습니다.", member.getName()));
@@ -119,9 +123,9 @@ public class WebSocketService {
                 socket.send(sessionRepository.getMessageOnMessageOffer(target));
             }
         }
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
-        GsonUtil.commonSendMessage(socket, "sdp", messageObj.userId,
-                200);
     }
 
     public void answer(WebSocket socket, LiveRequestDto messageObj, String message) {
@@ -135,9 +139,9 @@ public class WebSocketService {
         else {
             sendToAll(messageObj.lectureId, messageObj.userId, message);
         }
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
-        GsonUtil.commonSendMessage(socket, "sdp",messageObj.userId,
-                200);
     }
 
     public void exitLive(WebSocket socket, LiveRequestDto messageObj) {
@@ -169,9 +173,9 @@ public class WebSocketService {
         }
         log.info("client exited: {}", messageObj.userId);
 
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("exitLive", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
-        GsonUtil.commonSendMessage(socket, "exitLive", messageObj.userId,
-                200);
     }
 
 
