@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 public class MemorySessionRepository implements SessionRepository{
+    //lecture id, waiting session participants
+    private final Map<String, List<WebSocket>> waitingRoom = new HashMap<>();
+
     // member id, member socket
     private final Map<String, WebSocket> connections = new HashMap<>();
 
@@ -105,5 +108,15 @@ public class MemorySessionRepository implements SessionRepository{
     @Override
     public void addSessionOnLecture(String lectureId, String targetToAdd) {
         sessionManager.get(lectureId).add(targetToAdd);
+    }
+
+    @Override
+    public Boolean containsKeyOnWaitingRoom(String key) {
+        return waitingRoom.containsKey(key);
+    }
+
+    @Override
+    public void addConnectionOnWaitingRoom(String key, WebSocket connection) {
+        waitingRoom.get(key).add(connection);
     }
 }

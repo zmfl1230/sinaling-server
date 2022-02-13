@@ -28,5 +28,7 @@ public interface SessionRepository {
     void removeSessionOnLecture(String lectureId, String targetToRemove);
     void addSessionOnLecture(String lectureId, String targetToAdd);
 
-
+    // waitingRoom
+    Boolean containsKeyOnWaitingRoom(String changeLongToString);
+    void addConnectionOnWaitingRoom(String changeLongToString, WebSocket socket);
 }

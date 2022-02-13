@@ -32,6 +32,36 @@ public class WebSocketService {
         log.info("라이브 진행 여부 발송 성공 proceeding: {}",proceeding);
     }
 
+    public void enterWaitingRoom(WebSocket socket, LiveRequestDto messageObj) {
+        Member member = objectRepository.findMember(messageObj.userId);
+        Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
+        ValidatePermission.validateAccessPermission(member, lecture);
+
+        // waitingRoom에 해당 강의 Id가 키로 있는지 조사(요청 시점에 강의가 생성되었을 수도 있으니)
+        Boolean lectureProceeding = sessionRepository.containsKeyOnWaitingRoom(changeLongToString(lecture.getId()));
+
+        // 있는 경우, 해당 컬렉션에 본인 커넥션 추가
+        if (lectureProceeding){
+            sessionRepository.addConnectionOnWaitingRoom(changeLongToString(lecture.getId()), socket);
+            Map<String, Object> objectMap = GsonUtil.makeCommonMap("enterWaitingRoom", messageObj.userId, 200);
+            objectMap.put("lecturerId", lecture.getLecturer().getId());
+            GsonUtil.commonSendMessage(socket, objectMap);
+
+            log.info("대기실 입장: {}",messageObj.userId);
+        } else{
+        // 없는 경우(요청 시점에 강의가 생성된 경우)
+        // 컬렉션에 커넥션 추가할 필요없이 강의가 생성되었음을 알림
+
+            Map<String, Object> objectMap = GsonUtil.makeCommonMap("liveStarted", messageObj.userId, 200);
+            objectMap.put("lecturerId", lecture.getLecturer().getId());
+            GsonUtil.commonSendMessage(socket, objectMap);
+
+            log.info("강의 열림: {}",messageObj.lectureId);
+        }
+
+
+    }
+
     public void startLive(WebSocket socket, LiveRequestDto messageObj) {
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
         ValidatePermission.validateLecturer(messageObj.userId, lecture);
