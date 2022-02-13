@@ -31,4 +31,6 @@ public interface SessionRepository {
     // waitingRoom
     Boolean containsKeyOnWaitingRoom(String changeLongToString);
     void addConnectionOnWaitingRoom(String changeLongToString, WebSocket socket);
+    List<WebSocket> getConnectionOnWaitingRoom(String changeLongToString);
+    void removeKeyOnWaitingRoom(String changeLongToString);
 }

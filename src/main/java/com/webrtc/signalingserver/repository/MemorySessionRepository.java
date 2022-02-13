@@ -119,4 +119,14 @@ public class MemorySessionRepository implements SessionRepository{
     public void addConnectionOnWaitingRoom(String key, WebSocket connection) {
         waitingRoom.get(key).add(connection);
     }
+
+    @Override
+    public List<WebSocket> getConnectionOnWaitingRoom(String key) {
+        return waitingRoom.get(key);
+    }
+
+    @Override
+    public void removeKeyOnWaitingRoom(String key) {
+        waitingRoom.remove(key);
+    }
 }

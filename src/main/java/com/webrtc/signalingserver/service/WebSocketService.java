@@ -10,6 +10,8 @@ import com.webrtc.signalingserver.repository.SessionRepository;
 import com.webrtc.signalingserver.util.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
+
+import java.util.List;
 import java.util.Map;
 
 import static com.webrtc.signalingserver.util.EncryptString.*;
@@ -72,9 +74,22 @@ public class WebSocketService {
 
         Map<String, Object> objectMap = GsonUtil.makeCommonMap("startLive", messageObj.userId, 200);
         GsonUtil.commonSendMessage(socket, objectMap);
-
-
         log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
+
+        // 대기실에 있는 모든 클라이언트에게 강의 생성 알림
+        if(sessionRepository.containsKeyOnWaitingRoom(changeLongToString(messageObj.lectureId))) {
+            List<WebSocket> connections = sessionRepository.getConnectionOnWaitingRoom(changeLongToString(messageObj.lectureId));
+            for (WebSocket connection : connections) {
+                Map<String, Object> map = GsonUtil.makeCommonMap("liveStarted", 0L, 200);
+                map.put("lecturerId", messageObj.userId);
+                GsonUtil.commonSendMessage(connection, map);
+            }
+            // 강의가 열린후, 해당 강의의 대기실 삭제
+            sessionRepository.removeKeyOnWaitingRoom(changeLongToString(messageObj.lectureId));
+            log.info("liveStarted, 알림 발송 성공");
+
+        }
+
     }
 
     public void enterLive(WebSocket socket, LiveRequestDto messageObj) {
