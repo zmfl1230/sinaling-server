@@ -25,6 +25,13 @@ public class WebSocketService {
         this.sessionRepository = sessionRepository;
     }
 
+    public void isLiveProceeding(WebSocket socket, LiveRequestDto messageObj) {
+        boolean proceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(messageObj.lectureId));
+        GsonUtil.sendLiveStatusMessage(socket, "isLiveProceeding", messageObj.userId, 200, proceeding);
+
+        log.info("라이브 진행 여부 발송 성공 proceeding: {}",proceeding);
+    }
+
     public void startLive(WebSocket socket, LiveRequestDto messageObj) {
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
         ValidatePermission.validateLecturer(messageObj.userId, lecture);
