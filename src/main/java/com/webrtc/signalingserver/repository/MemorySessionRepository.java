@@ -129,4 +129,9 @@ public class MemorySessionRepository implements SessionRepository{
     public void removeKeyOnWaitingRoom(String key) {
         waitingRoom.remove(key);
     }
+
+    @Override
+    public void createWaitingRoomByLectureId(String key) {
+        waitingRoom.put(key, new LinkedList<>());
+    }
 }

@@ -33,4 +33,5 @@ public interface SessionRepository {
     void addConnectionOnWaitingRoom(String changeLongToString, WebSocket socket);
     List<WebSocket> getConnectionOnWaitingRoom(String changeLongToString);
     void removeKeyOnWaitingRoom(String changeLongToString);
+    void createWaitingRoomByLectureId(String changeLongToString);
 }
