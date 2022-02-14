@@ -3,23 +3,23 @@ package com.webrtc.signalingserver.repository;
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class MemorySessionRepository implements SessionRepository{
     //lecture id, waiting session participants
-    private final Map<String, List<WebSocket>> waitingRoom = new HashMap<>();
+    private final ConcurrentMap<String, List<WebSocket>> waitingRoom = new ConcurrentHashMap<>();
 
     // member id, member socket
-    private final Map<String, WebSocket> connections = new HashMap<>();
+    private final ConcurrentMap<String, WebSocket> connections = new ConcurrentHashMap<>();
 
     // lecture id, session participants
-    private final Map<String, List<String>> sessionManager = new HashMap<>();
+    private final ConcurrentMap<String, List<String>> sessionManager = new ConcurrentHashMap<>();
 
     // member id, message
-    private final Map<String, String> messageOffer = new HashMap<>();
+    private final ConcurrentMap<String, String> messageOffer = new ConcurrentHashMap<>();
 
     @Override
     public Boolean containsKeyOnConnections(String key) {
@@ -121,7 +121,7 @@ public class MemorySessionRepository implements SessionRepository{
     }
 
     @Override
-    public List<WebSocket> getConnectionOnWaitingRoom(String key) {
+    public List<WebSocket> getConnectionsOnWaitingRoom(String key) {
         return waitingRoom.get(key);
     }
 
