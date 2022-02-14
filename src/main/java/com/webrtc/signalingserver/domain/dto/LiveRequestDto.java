@@ -19,6 +19,8 @@ public class LiveRequestDto {
 
     public SdpDto sdp;
 
+    public IceCandidateDto candidate;
+
     public static LiveRequestDto buildBasicDto(String type, Long userId, Long lectureId, String token) {
         LiveRequestDtoBuilder liveRequestDtoBuilder = LiveRequestDto
                 .builder()
