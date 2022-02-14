@@ -146,60 +146,17 @@ public class WebSocketService {
     }
 
 
-    public void sdp(WebSocket socket, LiveRequestDto messageObj, String message) {
-        switch(messageObj.sdp.type) {
-            case "offer":
-                this.offer(socket, messageObj, message);
-                break;
-
-            case "answer":
-                this.answer(socket, messageObj, message);
-                break;
-
-            default:
-                log.info("잘못된 sdp 요청입니다.");
-                break;
-        }
-
-    }
-
-    public void offer(WebSocket socket, LiveRequestDto messageObj, String message) {
-        // 본인 sdp를 포함한 메세지 저장
-        String encryptedUser = changeLongToString(messageObj.lectureId, messageObj.userId);
-        sessionRepository.addMessageOnMessageOffer(encryptedUser, message);
-
-        // 본인을 제외한 나머지 참여자에게 offer 전달
+    public void sdp(WebSocket socket, LiveRequestDto messageObj) {
+        // 본인을 제외한 나머지 참여자에게 offer 혹은 answer 전달
         Map<String, Object> map = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
+        map.put("spd", messageObj.sdp);
         sendToAll(messageObj.lectureId, messageObj.userId,  map);
 
-        // 나머지 참여자의 offer 본인에게 전달
-        for (String target : sessionRepository.getSessionsByLectureId(changeLongToString(messageObj.lectureId))) {
-            // 본인을 제외한 모두의 message를 본인에게 보냄
-            if (!target.equals(encryptedUser)) {
-                socket.send(sessionRepository.getMessageOnMessageOffer(target));
-            }
-        }
+        // sdp 전체 발송 성공
         Map<String, Object> objectMap = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
         GsonUtil.commonSendMessage(socket, objectMap);
-
     }
 
-    public void answer(WebSocket socket, LiveRequestDto messageObj, String message) {
-        // Json 문자열 -> Map
-        Map<String, Object> map = GsonUtil.decode(message, Map.class);
-        if(map.containsKey("sender") && map.get("sender") instanceof Long) {
-            String encryptedSender = changeLongToString(messageObj.lectureId, (Long) map.get("sender"));
-            if(sessionRepository.containsKeyOnConnections(encryptedSender))
-                sessionRepository.sendMessageUsingConnectionKey(encryptedSender, message);
-        }
-        else {
-            Map<String, Object> mapObj = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
-            sendToAll(messageObj.lectureId, messageObj.userId,  mapObj);
-        }
-        Map<String, Object> objectMap = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
-        GsonUtil.commonSendMessage(socket, objectMap);
-
-    }
 
     public void exitLive(WebSocket socket, LiveRequestDto messageObj) {
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);

@@ -3,6 +3,7 @@ package com.webrtc.signalingserver;
 import com.google.gson.Gson;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.service.WebSocketService;
+import com.webrtc.signalingserver.util.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -44,17 +45,14 @@ public class LectureSession extends WebSocketServer {
             // Gson 객체 생성
             Gson gson = new Gson();
             LiveRequestDto messageObj = gson.fromJson(message, LiveRequestDto.class);
-
-            if(messageObj.type.equalsIgnoreCase("sdp")) {
-                // sdp [offer, answer]
-                methodMap.get((messageObj.type).toLowerCase()).invoke(webSocketService, conn, messageObj, message);
-            } else {
-                // start, enter, exit
-                methodMap.get((messageObj.type).toLowerCase()).invoke(webSocketService, conn, messageObj);
-            }
+            // start, enter, exit, sdp
+            methodMap.get((messageObj.type).toLowerCase()).invoke(webSocketService, conn, messageObj);
 
         } catch (IllegalAccessException | InvocationTargetException | NullPointerException e) {
-            log.info(e.toString());
+            Map<String, Object> objectMap = GsonUtil.makeCommonMap(Arrays.toString(e.getStackTrace()), -1L, 400);
+            GsonUtil.commonSendMessage(conn, objectMap);
+
+            log.info(Arrays.toString(e.getStackTrace()));
         }
     }
 
