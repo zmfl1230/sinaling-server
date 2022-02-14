@@ -71,7 +71,7 @@ public class EnterLiveTest {
         webSocketService.enterLive(studentClient.getConnection(), enterLive);
 
         //Then
-        String encryptedKey = convertedToEncryption(lecture.getId(), student1.getId());
+        String encryptedKey = changeLongToString(lecture.getId(), student1.getId());
         //connection 저장 여부 확인
         assertThat(sessionRepository.containsKeyOnConnections(encryptedKey)).isTrue();
         assertThat(sessionRepository.getWebSocketOnConnections(encryptedKey)).isSameAs(studentClient.getConnection());

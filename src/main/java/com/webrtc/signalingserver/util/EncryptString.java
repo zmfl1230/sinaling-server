@@ -1,5 +1,7 @@
 package com.webrtc.signalingserver.util;
 
+import com.webrtc.signalingserver.Constants;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +46,7 @@ public class EncryptString {
     }
 
     public static String changeLongToString(Long arg1, Long arg2) {
-        return arg1 + Long.toString(arg2);
+        return arg1 + Constants.DELIMITER +Long.toString(arg2);
     }
 
     public static String changeLongToString(Long arg) {

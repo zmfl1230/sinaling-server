@@ -115,7 +115,7 @@ public class StartLiveTest {
         webSocketService.startLive(client.getConnection(), startLive);
 
         //given
-        String encryptedKey = convertedToEncryption(teacher.getId(), lecture.getId());
+        String encryptedKey = changeLongToString(teacher.getId(), lecture.getId());
         assertThat(sessionRepository.containsKeyOnConnections(encryptedKey)).isTrue();
         assertThat(sessionRepository.getWebSocketOnConnections(encryptedKey)).isSameAs(client.getConnection());
     }

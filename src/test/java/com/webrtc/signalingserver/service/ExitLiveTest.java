@@ -92,13 +92,13 @@ public class ExitLiveTest {
         assertThat(sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(lecture.getId()))).isFalse();
 
         // 강의자 관련 데이터가 완전히 제거되었는지 확인
-        String encryption = convertedToEncryption(lecture.getId(), lecture.getLecturer().getId());
+        String encryption = changeLongToString(lecture.getId(), lecture.getLecturer().getId());
         assertThat(sessionRepository.containsKeyOnConnections(encryption)).isFalse();
         assertThat(sessionRepository.containsKeyOnMessageOffer(encryption)).isFalse();
 
         // 강의 수강생 관련 데이터가 완전히 제거되었는지 확인
         for (Member student : lecture.getStudents()) {
-            encryption = convertedToEncryption(lecture.getId(), student.getId());
+            encryption = changeLongToString(lecture.getId(), student.getId());
             assertThat(sessionRepository.containsKeyOnConnections(encryption)).isFalse();
             assertThat(sessionRepository.containsKeyOnMessageOffer(encryption)).isFalse();
         }
@@ -141,12 +141,12 @@ public class ExitLiveTest {
         assertThat(sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(lecture1.getId()))).isTrue();
 
         // 강의자 관련 데이터가 아직 존재하는지 확인(삭제되면 안됨)
-        String encryption = convertedToEncryption(lecture1.getId(), lecture1.getLecturer().getId());
+        String encryption = changeLongToString(lecture1.getId(), lecture1.getLecturer().getId());
         assertThat(sessionRepository.containsKeyOnConnections(encryption)).isTrue();
         // assertThat(sessionRepository.containsKeyOnMessageOffer(encryption)).isTrue();
 
         // 강의 수강생 관련 데이터가 완전히 제거되었는지 확인
-        encryption = convertedToEncryption(lecture1.getId(), teacher2.getId());
+        encryption = changeLongToString(lecture1.getId(), teacher2.getId());
         assertThat(sessionRepository.containsKeyOnConnections(encryption)).isFalse();
         assertThat(sessionRepository.containsKeyOnMessageOffer(encryption)).isFalse();
 
@@ -172,12 +172,12 @@ public class ExitLiveTest {
         assertThat(sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(lecture.getId()))).isTrue();
 
         // 강의자 관련 데이터가 아직 존재하는지 확인(삭제되면 안됨)
-        String encryption = convertedToEncryption(lecture.getId(), lecture.getLecturer().getId());
+        String encryption = changeLongToString(lecture.getId(), lecture.getLecturer().getId());
         assertThat(sessionRepository.containsKeyOnConnections(encryption)).isTrue();
 //        assertThat(sessionRepository.containsKeyOnMessageOffer(encryption)).isTrue();
 
         // 강의 수강생 관련 데이터가 완전히 제거되었는지 확인
-        encryption = convertedToEncryption(lecture.getId(), student1.getId());
+        encryption = changeLongToString(lecture.getId(), student1.getId());
         assertThat(sessionRepository.containsKeyOnConnections(encryption)).isFalse();
         assertThat(sessionRepository.containsKeyOnMessageOffer(encryption)).isFalse();
 
