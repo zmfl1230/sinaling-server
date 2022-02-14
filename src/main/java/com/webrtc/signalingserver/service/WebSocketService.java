@@ -21,10 +21,12 @@ public class WebSocketService {
 
     private final ObjectRepository objectRepository;
     private final SessionRepository sessionRepository;
+    private final TemplateForSynchronized template;
 
-    public WebSocketService(ObjectRepository objectRepository, SessionRepository sessionRepository) {
+    public WebSocketService(ObjectRepository objectRepository, SessionRepository sessionRepository, TemplateForSynchronized templateForSynchronized) {
         this.objectRepository = objectRepository;
         this.sessionRepository = sessionRepository;
+        this.template = templateForSynchronized;
     }
 
     public void isLiveProceeding(WebSocket socket, LiveRequestDto messageObj) {
@@ -42,57 +44,64 @@ public class WebSocketService {
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
         ValidatePermission.validateAccessPermission(member, lecture);
 
-        // SessionManager에 해당 강의 Id가 키로 있는지 조사(요청 시점에 강의가 생성되었을 수도 있으니)
-        Boolean lectureProceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(lecture.getId()));
+        NeedToSynchronized executingLogic = () -> {
+            // SessionManager에 해당 강의 Id가 키로 있는지 조사(요청 시점에 강의가 생성되었을 수도 있으니)
+            Boolean lectureProceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(lecture.getId()));
 
-        // 있는 경우, 이미 강의 라이브 진행중 (요청 시점에 라이브 실행됨)
-        // 컬렉션에 커넥션 추가할 필요없이 강의가 생성되었음을 알림
-        if (lectureProceeding){
+            // 있는 경우, 이미 강의 라이브 진행중 (요청 시점에 라이브 실행됨)
+            // 컬렉션에 커넥션 추가할 필요없이 강의가 생성되었음을 알림
+            if (lectureProceeding){
 
-            Map<String, Object> objectMap = GsonUtil.makeCommonMap("liveStarted", messageObj.userId, 200);
-            objectMap.put("lecturerId", lecture.getLecturer().getId());
-            GsonUtil.commonSendMessage(socket, objectMap);
+                Map<String, Object> objectMap = GsonUtil.makeCommonMap("liveStarted", messageObj.userId, 200);
+                objectMap.put("lecturerId", lecture.getLecturer().getId());
+                GsonUtil.commonSendMessage(socket, objectMap);
 
-            log.info("강의 열림: {}",messageObj.lectureId);
+                log.info("강의 열림: {}",messageObj.lectureId);
 
-        } else{
-            // 없는 경우
-            // waiting room 이 없으면 생성
-            if(!sessionRepository.containsKeyOnWaitingRoom(changeLongToString(lecture.getId()))) sessionRepository.createWaitingRoomByLectureId(changeLongToString(lecture.getId()));
-            // 해당 컬렉션에 본인 커넥션 추가
-            sessionRepository.addConnectionOnWaitingRoom(changeLongToString(lecture.getId()), socket);
-            Map<String, Object> objectMap = GsonUtil.makeCommonMap("enterWaitingRoom", messageObj.userId, 200);
-            objectMap.put("lecturerId", lecture.getLecturer().getId());
-            GsonUtil.commonSendMessage(socket, objectMap);
+            } else{
+                // 없는 경우
+                // waiting room 이 없으면 생성
+                if(!sessionRepository.containsKeyOnWaitingRoom(changeLongToString(lecture.getId()))) sessionRepository.createWaitingRoomByLectureId(changeLongToString(lecture.getId()));
+                // 해당 컬렉션에 본인 커넥션 추가
+                sessionRepository.addConnectionOnWaitingRoom(changeLongToString(lecture.getId()), socket);
+                Map<String, Object> objectMap = GsonUtil.makeCommonMap("enterWaitingRoom", messageObj.userId, 200);
+                objectMap.put("lecturerId", lecture.getLecturer().getId());
+                GsonUtil.commonSendMessage(socket, objectMap);
 
-            log.info("대기실 입장: {}",messageObj.userId);
-        }
+                log.info("대기실 입장: {}",messageObj.userId);
+            }
+        };
 
+        template.executeToSynchronize(executingLogic);
 
     }
 
     public void startLive(WebSocket socket, LiveRequestDto messageObj) {
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
         ValidatePermission.validateLecturer(messageObj.userId, lecture);
-        startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        Map<String, Object> objectMap = GsonUtil.makeCommonMap("startLive", messageObj.userId, 200);
-        GsonUtil.commonSendMessage(socket, objectMap);
-        log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
+        NeedToSynchronized executingLogic = () -> {
+            startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        // 대기실에 있는 모든 클라이언트에게 강의 생성 알림
-        if(sessionRepository.containsKeyOnWaitingRoom(changeLongToString(messageObj.lectureId))) {
-            List<WebSocket> connections = sessionRepository.getConnectionOnWaitingRoom(changeLongToString(messageObj.lectureId));
-            for (WebSocket connection : connections) {
-                Map<String, Object> map = GsonUtil.makeCommonMap("liveStarted", 0L, 200);
-                map.put("lecturerId", messageObj.userId);
-                GsonUtil.commonSendMessage(connection, map);
+            Map<String, Object> objectMap = GsonUtil.makeCommonMap("startLive", messageObj.userId, 200);
+            GsonUtil.commonSendMessage(socket, objectMap);
+            log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
+
+            // 대기실에 있는 모든 클라이언트에게 강의 생성 알림
+            if(sessionRepository.containsKeyOnWaitingRoom(changeLongToString(messageObj.lectureId))) {
+                List<WebSocket> connections = sessionRepository.getConnectionOnWaitingRoom(changeLongToString(messageObj.lectureId));
+                for (WebSocket connection : connections) {
+                    Map<String, Object> map = GsonUtil.makeCommonMap("liveStarted", 0L, 200);
+                    map.put("lecturerId", messageObj.userId);
+                    GsonUtil.commonSendMessage(connection, map);
+                }
+                // 강의가 열린후, 해당 강의의 대기실 삭제
+                sessionRepository.removeKeyOnWaitingRoom(changeLongToString(messageObj.lectureId));
+                log.info("liveStarted, 알림 발송 성공");
+
             }
-            // 강의가 열린후, 해당 강의의 대기실 삭제
-            sessionRepository.removeKeyOnWaitingRoom(changeLongToString(messageObj.lectureId));
-            log.info("liveStarted, 알림 발송 성공");
-
-        }
+        };
+        template.executeToSynchronize(executingLogic);
 
     }
 
