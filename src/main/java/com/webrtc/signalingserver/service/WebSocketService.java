@@ -145,6 +145,19 @@ public class WebSocketService {
 
     }
 
+    public void iceCandidate(WebSocket socket, LiveRequestDto messageObj) {
+
+        // 본인을 제외한 나머지 참여자에게 offer 혹은 answer 전달
+        Map<String, Object> map = GsonUtil.makeCommonMap("iceCandidate", messageObj.userId, 200);
+        map.put("candidate", messageObj.candidate);
+        sendToAll(messageObj.lectureId, messageObj.userId, map);
+
+        // sdp 전체 발송 성공
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("iceCandidate", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
+
+    }
+
 
     public void sdp(WebSocket socket, LiveRequestDto messageObj) {
         // 본인을 제외한 나머지 참여자에게 offer 혹은 answer 전달
