@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ExitLiveTest {
 
     WebSocketClient teacherClient;
-    WebSocketClient studentClient;
+    TemplateForSynchronized template;
     ObjectRepository objectRepository;
     SessionRepository sessionRepository;
     WebSocketService webSocketService;
@@ -40,7 +40,8 @@ public class ExitLiveTest {
     public void setUp() {
         objectRepository = new MemoryRepository();
         sessionRepository = new MemorySessionRepository();
-        webSocketService = new WebSocketService(objectRepository, sessionRepository);
+        template = new TemplateForSynchronized();
+        webSocketService = new WebSocketService(objectRepository, sessionRepository, template);
 
         teacher1 = new Member(1L, "teacher", MemberRole.LECTURER);
         teacher2 = new Member(4L, "teacher1", MemberRole.LECTURER);

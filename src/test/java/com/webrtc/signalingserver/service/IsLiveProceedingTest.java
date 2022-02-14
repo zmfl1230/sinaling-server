@@ -21,6 +21,7 @@ class IsLiveProceedingTest {
     ObjectRepository objectRepository;
     SessionRepository sessionRepository;
     WebSocketService webSocketService;
+    TemplateForSynchronized template;
 
     Member teacher;
     Member student;
@@ -30,7 +31,8 @@ class IsLiveProceedingTest {
     public void setUp() {
         objectRepository = new MemoryRepository();
         sessionRepository = new MemorySessionRepository();
-        webSocketService = new WebSocketService(objectRepository, sessionRepository);
+        template = new TemplateForSynchronized();
+        webSocketService = new WebSocketService(objectRepository, sessionRepository, template);
 
         teacher = new Member(1L, "teacher", MemberRole.LECTURER);
         student = new Member(2L, "student1", MemberRole.STUDENT);
