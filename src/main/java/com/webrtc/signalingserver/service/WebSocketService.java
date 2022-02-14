@@ -1,5 +1,6 @@
 package com.webrtc.signalingserver.service;
 
+import com.webrtc.signalingserver.Constants;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
@@ -11,6 +12,7 @@ import com.webrtc.signalingserver.util.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -116,8 +118,33 @@ public class WebSocketService {
         GsonUtil.commonSendMessage(socket, objectMap);
 
         log.info("라이브 입장 성공, {}", socket.getRemoteSocketAddress());
-        sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s님이 입장하셨습니다.", member.getName()));
+
+        // 입장 발송
+        Map<String, Object> map = GsonUtil.makeCommonMap("userEntered", messageObj.userId, 200);
+        sendToAll(messageObj.lectureId, messageObj.userId, map);
     }
+
+    public void getConnectionsOnLecture(WebSocket socket, LiveRequestDto messageObj) {
+        Member member = objectRepository.findMember(messageObj.userId);
+        Lecture lectureToEnter = objectRepository.findLecture(messageObj.lectureId);
+        ValidatePermission.validateAccessPermission(member, lectureToEnter);
+
+        List<String> connections = sessionRepository.getSessionsByLectureId(changeLongToString(messageObj.lectureId));
+        List<Long> membersInLecture = new ArrayList<>();
+        for (String connection : connections) {
+            String[] splited = connection.split(Constants.DELIMITER);
+            if(splited.length != 2) continue;
+            membersInLecture.add(Long.parseLong(splited[Constants.MEMBER]));
+        }
+
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("getConnectionsOnLecture", messageObj.userId, 200);
+        objectMap.put("members", membersInLecture);
+        GsonUtil.commonSendMessage(socket, objectMap);
+
+        log.info("접속자 전송 성공, {}", socket.getRemoteSocketAddress());
+
+    }
+
 
     public void sdp(WebSocket socket, LiveRequestDto messageObj, String message) {
         switch(messageObj.sdp.type) {
@@ -138,11 +165,12 @@ public class WebSocketService {
 
     public void offer(WebSocket socket, LiveRequestDto messageObj, String message) {
         // 본인 sdp를 포함한 메세지 저장
-        String encryptedUser = convertedToEncryption(messageObj.lectureId, messageObj.userId);
+        String encryptedUser = changeLongToString(messageObj.lectureId, messageObj.userId);
         sessionRepository.addMessageOnMessageOffer(encryptedUser, message);
 
         // 본인을 제외한 나머지 참여자에게 offer 전달
-        sendToAll(messageObj.lectureId, messageObj.userId,  message);
+        Map<String, Object> map = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
+        sendToAll(messageObj.lectureId, messageObj.userId,  map);
 
         // 나머지 참여자의 offer 본인에게 전달
         for (String target : sessionRepository.getSessionsByLectureId(changeLongToString(messageObj.lectureId))) {
@@ -160,12 +188,13 @@ public class WebSocketService {
         // Json 문자열 -> Map
         Map<String, Object> map = GsonUtil.decode(message, Map.class);
         if(map.containsKey("sender") && map.get("sender") instanceof Long) {
-            String encryptedSender = convertedToEncryption(messageObj.lectureId, (Long) map.get("sender"));
+            String encryptedSender = changeLongToString(messageObj.lectureId, (Long) map.get("sender"));
             if(sessionRepository.containsKeyOnConnections(encryptedSender))
                 sessionRepository.sendMessageUsingConnectionKey(encryptedSender, message);
         }
         else {
-            sendToAll(messageObj.lectureId, messageObj.userId, message);
+            Map<String, Object> mapObj = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
+            sendToAll(messageObj.lectureId, messageObj.userId,  mapObj);
         }
         Map<String, Object> objectMap = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
         GsonUtil.commonSendMessage(socket, objectMap);
@@ -192,12 +221,14 @@ public class WebSocketService {
         }
         // 수강생 강의 종료
         else {
-             String encryptedUser = convertedToEncryption(messageObj.lectureId, messageObj.userId);
+             String encryptedUser = changeLongToString(messageObj.lectureId, messageObj.userId);
             if(sessionRepository.containsConnectionOnLectureSession(changeLongToString(messageObj.lectureId), encryptedUser))
                 throw new IllegalArgumentException("접속 정보가 없는 사용자입니다.");
              removeConnections(encryptedUser);
              sessionRepository.removeSessionOnLecture(changeLongToString(lecture.getId()), encryptedUser);
-             sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s 님이 라이브 강의를 나갔습니다.", messageObj.userId));
+
+             Map<String, Object> mapObj = GsonUtil.makeCommonMap("userExited", messageObj.userId, 200);
+             sendToAll(messageObj.lectureId, messageObj.userId,  mapObj);
         }
         log.info("client exited: {}", messageObj.userId);
 
@@ -207,19 +238,19 @@ public class WebSocketService {
     }
 
 
-    private void sendToAll(Long lectureId, Long userId, String message) {
-        String changedValue = convertedToEncryption(lectureId, userId);
+    private void sendToAll(Long lectureId, Long userId, Map<String, Object> objectMap) {
+        String changedValue = changeLongToString(lectureId, userId);
         for (String target : sessionRepository.getSessionsByLectureId(changeLongToString(lectureId))) {
             // 본인을 제외한 모두에게 요청보냄
             if (!target.equals(changedValue))
-                sessionRepository.sendMessageUsingConnectionKey(target, message);
+                GsonUtil.commonSendMessage(sessionRepository.getWebSocketOnConnections(target), objectMap);
         }
     }
 
     private void startLiveLecture(Long lectureId, Long userId, WebSocket conn) {
         String lectureToString = changeLongToString(lectureId);
         sessionRepository.addLectureSession(lectureToString);
-        String changedValue = convertedToEncryption(lectureId, userId);
+        String changedValue = changeLongToString(lectureId, userId);
         sessionRepository.addSessionOnLecture(lectureToString, changedValue);
         sessionRepository.addWebSocketOnConnections(changedValue, conn);
 
@@ -230,7 +261,7 @@ public class WebSocketService {
         String lectureToString = changeLongToString(lectureId);
         if(!sessionRepository.containsLectureSessionOnSessionManager(lectureToString)) throw new IllegalArgumentException("현재 진행하지 않는 강의입니다.");
 
-        String changedValue = convertedToEncryption(lectureId, userId);
+        String changedValue = changeLongToString(lectureId, userId);
         sessionRepository.addSessionOnLecture(lectureToString, changedValue);
         sessionRepository.addWebSocketOnConnections(changedValue, conn);
         log.info("강의 세션에 참가하였습니다");
