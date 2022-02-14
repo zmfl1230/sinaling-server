@@ -47,7 +47,7 @@ public class WebSocketService {
         NeedToSynchronized executingLogic = () -> {
             // SessionManager에 해당 강의 Id가 키로 있는지 조사(요청 시점에 강의가 생성되었을 수도 있으니)
             Boolean lectureProceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(lecture.getId()));
-
+            log.info("proceeding: {}",lectureProceeding);
             // 있는 경우, 이미 강의 라이브 진행중 (요청 시점에 라이브 실행됨)
             // 컬렉션에 커넥션 추가할 필요없이 강의가 생성되었음을 알림
             if (lectureProceeding){
@@ -89,7 +89,7 @@ public class WebSocketService {
 
             // 대기실에 있는 모든 클라이언트에게 강의 생성 알림
             if(sessionRepository.containsKeyOnWaitingRoom(changeLongToString(messageObj.lectureId))) {
-                List<WebSocket> connections = sessionRepository.getConnectionOnWaitingRoom(changeLongToString(messageObj.lectureId));
+                List<WebSocket> connections = sessionRepository.getConnectionsOnWaitingRoom(changeLongToString(messageObj.lectureId));
                 for (WebSocket connection : connections) {
                     Map<String, Object> map = GsonUtil.makeCommonMap("liveStarted", 0L, 200);
                     map.put("lecturerId", messageObj.userId);
