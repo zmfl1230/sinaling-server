@@ -27,6 +27,7 @@ public class StartLiveTest {
     ObjectRepository objectRepository;
     SessionRepository sessionRepository;
     WebSocketService webSocketService;
+    TemplateForSynchronized template;
 
     Member teacher;
     Member teacher1;
@@ -41,7 +42,8 @@ public class StartLiveTest {
 
         objectRepository = new MemoryRepository();
         sessionRepository = new MemorySessionRepository();
-        webSocketService = new WebSocketService(objectRepository, sessionRepository);
+        template = new TemplateForSynchronized();
+        webSocketService = new WebSocketService(objectRepository, sessionRepository, template);
 
         teacher = new Member(1L, "teacher", MemberRole.LECTURER);
         teacher1 = new Member(4L, "teacher1", MemberRole.LECTURER);

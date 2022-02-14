@@ -10,6 +10,8 @@ import com.webrtc.signalingserver.repository.SessionRepository;
 import com.webrtc.signalingserver.util.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
+
+import java.util.List;
 import java.util.Map;
 
 import static com.webrtc.signalingserver.util.EncryptString.*;
@@ -19,21 +21,88 @@ public class WebSocketService {
 
     private final ObjectRepository objectRepository;
     private final SessionRepository sessionRepository;
+    private final TemplateForSynchronized template;
 
-    public WebSocketService(ObjectRepository objectRepository, SessionRepository sessionRepository) {
+    public WebSocketService(ObjectRepository objectRepository, SessionRepository sessionRepository, TemplateForSynchronized templateForSynchronized) {
         this.objectRepository = objectRepository;
         this.sessionRepository = sessionRepository;
+        this.template = templateForSynchronized;
+    }
+
+    public void isLiveProceeding(WebSocket socket, LiveRequestDto messageObj) {
+        boolean proceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(messageObj.lectureId));
+
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("isLiveProceeding", messageObj.userId, 200);
+        objectMap.put("proceeding", proceeding);
+        GsonUtil.commonSendMessage(socket, objectMap);
+
+        log.info("라이브 진행 여부 발송 성공 proceeding: {}",proceeding);
+    }
+
+    public void enterWaitingRoom(WebSocket socket, LiveRequestDto messageObj) {
+        Member member = objectRepository.findMember(messageObj.userId);
+        Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
+        ValidatePermission.validateAccessPermission(member, lecture);
+
+        NeedToSynchronized executingLogic = () -> {
+            // SessionManager에 해당 강의 Id가 키로 있는지 조사(요청 시점에 강의가 생성되었을 수도 있으니)
+            Boolean lectureProceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(lecture.getId()));
+            log.info("proceeding: {}",lectureProceeding);
+            // 있는 경우, 이미 강의 라이브 진행중 (요청 시점에 라이브 실행됨)
+            // 컬렉션에 커넥션 추가할 필요없이 강의가 생성되었음을 알림
+            if (lectureProceeding){
+
+                Map<String, Object> objectMap = GsonUtil.makeCommonMap("liveStarted", messageObj.userId, 200);
+                objectMap.put("lecturerId", lecture.getLecturer().getId());
+                GsonUtil.commonSendMessage(socket, objectMap);
+
+                log.info("강의 열림: {}",messageObj.lectureId);
+
+            } else{
+                // 없는 경우
+                // waiting room 이 없으면 생성
+                if(!sessionRepository.containsKeyOnWaitingRoom(changeLongToString(lecture.getId()))) sessionRepository.createWaitingRoomByLectureId(changeLongToString(lecture.getId()));
+                // 해당 컬렉션에 본인 커넥션 추가
+                sessionRepository.addConnectionOnWaitingRoom(changeLongToString(lecture.getId()), socket);
+                Map<String, Object> objectMap = GsonUtil.makeCommonMap("enterWaitingRoom", messageObj.userId, 200);
+                objectMap.put("lecturerId", lecture.getLecturer().getId());
+                GsonUtil.commonSendMessage(socket, objectMap);
+
+                log.info("대기실 입장: {}",messageObj.userId);
+            }
+        };
+
+        template.executeToSynchronize(executingLogic);
+
     }
 
     public void startLive(WebSocket socket, LiveRequestDto messageObj) {
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
         ValidatePermission.validateLecturer(messageObj.userId, lecture);
-        startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        GsonUtil.commonSendMessage(socket, "startLive", messageObj.userId,
-                200);
+        NeedToSynchronized executingLogic = () -> {
+            startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
+            Map<String, Object> objectMap = GsonUtil.makeCommonMap("startLive", messageObj.userId, 200);
+            GsonUtil.commonSendMessage(socket, objectMap);
+            log.info("라이브 생성 성공, {}", socket.getRemoteSocketAddress());
+
+            // 대기실에 있는 모든 클라이언트에게 강의 생성 알림
+            if(sessionRepository.containsKeyOnWaitingRoom(changeLongToString(messageObj.lectureId))) {
+                List<WebSocket> connections = sessionRepository.getConnectionsOnWaitingRoom(changeLongToString(messageObj.lectureId));
+                for (WebSocket connection : connections) {
+                    Map<String, Object> map = GsonUtil.makeCommonMap("liveStarted", 0L, 200);
+                    map.put("lecturerId", messageObj.userId);
+                    GsonUtil.commonSendMessage(connection, map);
+                }
+                // 강의가 열린후, 해당 강의의 대기실 삭제
+                sessionRepository.removeKeyOnWaitingRoom(changeLongToString(messageObj.lectureId));
+                log.info("liveStarted, 알림 발송 성공");
+
+            }
+        };
+        template.executeToSynchronize(executingLogic);
+
     }
 
     public void enterLive(WebSocket socket, LiveRequestDto messageObj) {
@@ -43,8 +112,8 @@ public class WebSocketService {
         ValidatePermission.validateAccessPermission(member, lectureToEnter);
         enterLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
-        GsonUtil.commonSendMessage(socket, "enterLive", messageObj.userId,
-                200);
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("enterLive", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
         log.info("라이브 입장 성공, {}", socket.getRemoteSocketAddress());
         sendToAll(messageObj.lectureId, messageObj.userId, String.format("%s님이 입장하셨습니다.", member.getName()));
@@ -82,9 +151,9 @@ public class WebSocketService {
                 socket.send(sessionRepository.getMessageOnMessageOffer(target));
             }
         }
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
-        GsonUtil.commonSendMessage(socket, "sdp", messageObj.userId,
-                200);
     }
 
     public void answer(WebSocket socket, LiveRequestDto messageObj, String message) {
@@ -98,9 +167,9 @@ public class WebSocketService {
         else {
             sendToAll(messageObj.lectureId, messageObj.userId, message);
         }
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
-        GsonUtil.commonSendMessage(socket, "sdp",messageObj.userId,
-                200);
     }
 
     public void exitLive(WebSocket socket, LiveRequestDto messageObj) {
@@ -132,9 +201,9 @@ public class WebSocketService {
         }
         log.info("client exited: {}", messageObj.userId);
 
+        Map<String, Object> objectMap = GsonUtil.makeCommonMap("exitLive", messageObj.userId, 200);
+        GsonUtil.commonSendMessage(socket, objectMap);
 
-        GsonUtil.commonSendMessage(socket, "exitLive", messageObj.userId,
-                200);
     }
 
 
