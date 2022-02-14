@@ -22,16 +22,6 @@ public class GsonUtil{
         return gson.toJson(request);
     }
 
-    private static JsonObject makeJson(Map<String, Object> format) {
-        JsonObject jsonobject = new JsonObject();
-        for (String key : format.keySet()) {
-            if(format.get(key) instanceof String) jsonobject.addProperty(key, (String)format.get(key));
-            if(format.get(key) instanceof Number) jsonobject.addProperty(key, (Number)format.get(key));
-            if(format.get(key) instanceof Boolean) jsonobject.addProperty(key, (Boolean)format.get(key));
-        }
-        return jsonobject;
-    }
-
     public static Map<String, Object> makeCommonMap(String type, Long userId, int status) {
 
         Map<String, Object> map = new HashMap<>();
@@ -43,10 +33,8 @@ public class GsonUtil{
     }
 
     public static void commonSendMessage(WebSocket socket, Map<String, Object> keyValue) {
-        JsonObject obj = makeJson(keyValue);
-
         try {
-            socket.send(encode(obj));
+            socket.send(encode(keyValue));
         } catch (WebsocketNotConnectedException e) {
             System.out.println("e = " + e);
         }
