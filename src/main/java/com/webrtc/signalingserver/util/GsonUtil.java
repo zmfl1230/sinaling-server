@@ -27,6 +27,7 @@ public class GsonUtil{
         for (String key : format.keySet()) {
             if(format.get(key) instanceof String) jsonobject.addProperty(key, (String)format.get(key));
             if(format.get(key) instanceof Number) jsonobject.addProperty(key, (Number)format.get(key));
+            if(format.get(key) instanceof Boolean) jsonobject.addProperty(key, (Boolean)format.get(key));
         }
         return jsonobject;
     }
