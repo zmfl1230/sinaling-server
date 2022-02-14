@@ -198,8 +198,8 @@ public class WebSocketService {
     private void sendToAll(Long lectureId, Long userId, Map<String, Object> objectMap) {
         String changedValue = changeLongToString(lectureId, userId);
         for (String target : sessionRepository.getSessionsByLectureId(changeLongToString(lectureId))) {
-            // 본인을 제외한 모두에게 요청보냄
-            if (!target.equals(changedValue))
+            // 본인을 제외한 모두에게 요청보냄, 컨넥션이 없을 수도 있으니 target 값의 존재 여부 조사 후 전송
+            if (!target.equals(changedValue) && sessionRepository.containsKeyOnConnections(target))
                 GsonUtil.commonSendMessage(sessionRepository.getWebSocketOnConnections(target), objectMap);
         }
     }
