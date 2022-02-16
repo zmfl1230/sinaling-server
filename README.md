@@ -5,7 +5,7 @@
 WebRTC를 이용해 다자간 P2P 통신을 하기에 앞서 종단 간의 정보 전달을 위한 `시그널링 서버`를 구현합니다.
 
 프로젝트는 강사와 학생 그리고 강사의 강좌와 이 강좌를 수강하는 학생으로 간단하게 엔티티를 구성하였습니다.
-강사는 강좌를 개설할 수 있으며, 강좌는 강좌가 종료일까지 라이브 강의를 통해 학생들에게 강의를 진행합니다. 
+강사는 강좌를 개설할 수 있으며, 강사는 강좌 종료일까지 라이브 강의를 통해 학생들에게 강의를 진행합니다. 
 또한, 해당 라이브는 해당 강의를 수강하는 학생들만 입장할 수 있습니다. 
 학생은 라이브 시작 전과 후에 라이브 방에 입장할 수 있습니다.
 
@@ -21,7 +21,7 @@ WebRTC를 이용해 다자간 영상 통화를 가능하게 하는 다양한 라
 <img width="722" alt="image" src="https://user-images.githubusercontent.com/32871201/154042568-f0e66509-4c8b-4985-81fa-c88921ada8a2.png">
 
 ## ✔️ 라이브 강의 시작/입장 Call Flow
-<img width="637" alt="image" src="https://user-images.githubusercontent.com/32871201/154042752-c5836b5d-22e7-40bc-a306-40349faa3eff.png">
+<img width="637" alt="image" src="https://user-images.githubusercontent.com/32871201/154230729-3758cead-5490-40d8-b032-7a3571035295.png">
 
 ## ✔️ WebRTC 동작 구성도
 <img width="912" alt="image" src="https://user-images.githubusercontent.com/32871201/154042921-c5dffad7-1c2a-47d5-a803-953970202e4c.png">
