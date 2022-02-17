@@ -11,6 +11,7 @@ import com.webrtc.signalingserver.repository.SessionRepository;
 import com.webrtc.signalingserver.util.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,8 @@ import java.util.Map;
 import static com.webrtc.signalingserver.util.EncryptString.*;
 
 @Slf4j
+// private method에서 Transactional 어노테이션은 무시됨
+@Transactional
 public class WebSocketService {
 
     private final ObjectRepository objectRepository;
@@ -31,6 +34,7 @@ public class WebSocketService {
         this.template = templateForSynchronized;
     }
 
+    @Transactional(readOnly = true)
     public void isLiveProceeding(WebSocket socket, LiveRequestDto messageObj) {
         boolean proceeding = sessionRepository.containsLectureSessionOnSessionManager(changeLongToString(messageObj.lectureId));
 
@@ -145,6 +149,7 @@ public class WebSocketService {
 
     }
 
+    @Transactional(readOnly = true)
     public void iceCandidate(WebSocket socket, LiveRequestDto messageObj) {
 
         // 본인을 제외한 나머지 참여자에게 offer 혹은 answer 전달
@@ -159,6 +164,7 @@ public class WebSocketService {
     }
 
 
+    @Transactional(readOnly = true)
     public void sdp(WebSocket socket, LiveRequestDto messageObj) {
         // 본인을 제외한 나머지 참여자에게 offer 혹은 answer 전달
         Map<String, Object> map = GsonUtil.makeCommonMap("sdp", messageObj.userId, 200);
