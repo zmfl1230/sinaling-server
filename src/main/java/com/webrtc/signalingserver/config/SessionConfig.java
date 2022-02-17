@@ -1,10 +1,7 @@
 package com.webrtc.signalingserver.config;
 
 import com.webrtc.signalingserver.LectureSession;
-import com.webrtc.signalingserver.repository.MemoryRepository;
-import com.webrtc.signalingserver.repository.MemorySessionRepository;
-import com.webrtc.signalingserver.repository.ObjectRepository;
-import com.webrtc.signalingserver.repository.SessionRepository;
+import com.webrtc.signalingserver.repository.*;
 import com.webrtc.signalingserver.service.TemplateForSynchronized;
 import com.webrtc.signalingserver.service.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +33,7 @@ public class SessionConfig {
 
     @Bean
     public ObjectRepository objectRepository() {
-        return new MemoryRepository();
+        return new JpaRepository();
     }
 
     @Bean
