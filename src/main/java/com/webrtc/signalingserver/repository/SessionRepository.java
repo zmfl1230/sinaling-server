@@ -16,7 +16,6 @@ public interface SessionRepository {
     Boolean containsLectureSessionOnSessionManager(String key);
     Boolean containsConnectionOnLectureSession(String lectureId, String key);
     List<String> getSessionsByLectureId(String lectureId);
-    void addLectureSession(String lectureId);
     void removeLectureSessionByLectureId(String lectureId);
     void removeSessionOnLecture(String lectureId, String targetToRemove);
     void addSessionOnLecture(String lectureId, String targetToAdd);

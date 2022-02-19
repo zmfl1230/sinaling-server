@@ -219,7 +219,6 @@ public class WebSocketService {
 
     private void startLiveLecture(Long lectureId, Long userId, WebSocket conn) {
         String lectureToString = changeLongToString(lectureId);
-        sessionRepository.addLectureSession(lectureToString);
         String changedValue = changeLongToString(lectureId, userId);
         sessionRepository.addSessionOnLecture(lectureToString, changedValue);
         sessionRepository.addWebSocketOnConnections(changedValue, conn);
@@ -242,7 +241,6 @@ public class WebSocketService {
             sessionRepository.closeConnection(target);
             sessionRepository.removeKeyOnConnections(target);
         }
-        sessionRepository.removeMessageOnMessageOffer(target);
     }
 
 }
