@@ -14,7 +14,7 @@ public class MemorySessionRepository extends SessionManagerRepository {
 
 
     @Override
-    public void removeSessionOnLecture(String lectureId, String targetToRemove) {
+    public void removeConnectionOnLectureSession(String lectureId, String targetToRemove) {
         sessionManager.get(lectureId).remove(targetToRemove);
     }
 
@@ -29,7 +29,7 @@ public class MemorySessionRepository extends SessionManagerRepository {
     }
 
     @Override
-    public List<String> getSessionsByLectureId(String lectureId) {
+    public List<String> getConnectionsByLectureId(String lectureId) {
         return sessionManager.get(lectureId);
     }
 
@@ -40,7 +40,7 @@ public class MemorySessionRepository extends SessionManagerRepository {
     }
 
     @Override
-    public void addSessionOnLecture(String lectureId, String targetToAdd) {
+    public void addConnectionOnLectureSession(String lectureId, String targetToAdd) {
         if(!sessionManager.containsKey(lectureId)) addLectureSession(lectureId);
         sessionManager.get(lectureId).add(targetToAdd);
     }

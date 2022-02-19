@@ -66,14 +66,14 @@ abstract public class SessionManagerRepository implements SessionRepository{
     abstract public Boolean containsConnectionOnLectureSession(String lectureId, String key);
 
     @Override
-    abstract public List<String> getSessionsByLectureId(String lectureId);
+    abstract public List<String> getConnectionsByLectureId(String lectureId);
 
     @Override
     abstract public void removeLectureSessionByLectureId(String lectureId);
 
     @Override
-    abstract public void removeSessionOnLecture(String lectureId, String targetToRemove);
+    abstract public void removeConnectionOnLectureSession(String lectureId, String targetToRemove);
 
     @Override
-    abstract public void addSessionOnLecture(String lectureId, String targetToAdd);
+    abstract public void addConnectionOnLectureSession(String lectureId, String targetToAdd);
 }

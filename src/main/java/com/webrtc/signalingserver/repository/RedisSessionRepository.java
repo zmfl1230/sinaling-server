@@ -40,7 +40,7 @@ public class RedisSessionRepository extends SessionManagerRepository{
     }
 
     @Override
-    public List<String> getSessionsByLectureId(String lectureId) {
+    public List<String> getConnectionsByLectureId(String lectureId) {
         return new ArrayList<>(sessionManager.members(lectureId));
     }
 
@@ -50,12 +50,12 @@ public class RedisSessionRepository extends SessionManagerRepository{
     }
 
     @Override
-    public void removeSessionOnLecture(String lectureId, String targetToRemove) {
+    public void removeConnectionOnLectureSession(String lectureId, String targetToRemove) {
         sessionManager.remove(lectureId, targetToRemove);
     }
 
     @Override
-    public void addSessionOnLecture(String lectureId, String targetToAdd) {
+    public void addConnectionOnLectureSession(String lectureId, String targetToAdd) {
         sessionManager.add(lectureId, targetToAdd);
     }
 
