@@ -1,4 +1,8 @@
 spring:
+  redis:
+    host: localhost
+    port: 6379
+
   main:
     allow-circular-references: true
   datasource:
@@ -9,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format-sql: true
