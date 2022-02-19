@@ -1,7 +1,6 @@
 package com.webrtc.signalingserver.repository;
 
 import org.java_websocket.WebSocket;
-import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,15 +30,6 @@ public class MemorySessionRepository implements SessionRepository{
     @Override
     public WebSocket getWebSocketOnConnections(String key) {
         return connections.get(key);
-    }
-
-    @Override
-    public void sendMessageUsingConnectionKey(String key, String message) {
-        try {
-            connections.get(key).send(message);
-        } catch (WebsocketNotConnectedException e) {
-            System.out.println("e = " + e);
-        }
     }
 
     @Override

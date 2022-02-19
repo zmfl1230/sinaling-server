@@ -8,7 +8,6 @@ public interface SessionRepository {
     // connection
     Boolean containsKeyOnConnections(String key);
     WebSocket getWebSocketOnConnections(String key);
-    void sendMessageUsingConnectionKey(String key, String message);
     void removeKeyOnConnections(String key);
     void addWebSocketOnConnections(String key, WebSocket socket);
     void closeConnection(String key);
