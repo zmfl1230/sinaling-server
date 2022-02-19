@@ -7,40 +7,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class MemorySessionRepository implements SessionRepository{
-    //lecture id, waiting session participants
-    private final ConcurrentMap<String, List<WebSocket>> waitingRoom = new ConcurrentHashMap<>();
-
-    // member id, member socket
-    private final ConcurrentMap<String, WebSocket> connections = new ConcurrentHashMap<>();
+public class MemorySessionRepository extends SessionManagerRepository {
 
     // lecture id, session participants
     private final ConcurrentMap<String, List<String>> sessionManager = new ConcurrentHashMap<>();
 
-    @Override
-    public Boolean containsKeyOnConnections(String key) {
-        return connections.containsKey(key);
-    }
-
-    @Override
-    public void closeConnection(String key) {
-        connections.get(key).close();
-    }
-
-    @Override
-    public WebSocket getWebSocketOnConnections(String key) {
-        return connections.get(key);
-    }
-
-    @Override
-    public void removeKeyOnConnections(String key) {
-        connections.remove(key);
-    }
-
-    @Override
-    public void addWebSocketOnConnections(String key, WebSocket socket) {
-        connections.put(key, socket);
-    }
 
     @Override
     public void removeSessionOnLecture(String lectureId, String targetToRemove) {
@@ -62,10 +33,6 @@ public class MemorySessionRepository implements SessionRepository{
         return sessionManager.get(lectureId);
     }
 
-    @Override
-    public void addLectureSession(String lectureId) {
-        sessionManager.put(lectureId, new LinkedList<>());
-    }
 
     @Override
     public void removeLectureSessionByLectureId(String lectureId) {
@@ -74,31 +41,12 @@ public class MemorySessionRepository implements SessionRepository{
 
     @Override
     public void addSessionOnLecture(String lectureId, String targetToAdd) {
+        if(!sessionManager.containsKey(lectureId)) addLectureSession(lectureId);
         sessionManager.get(lectureId).add(targetToAdd);
     }
 
-    @Override
-    public Boolean containsKeyOnWaitingRoom(String key) {
-        return waitingRoom.containsKey(key);
+    private void addLectureSession(String lectureId) {
+        sessionManager.put(lectureId, new LinkedList<>());
     }
 
-    @Override
-    public void addConnectionOnWaitingRoom(String key, WebSocket connection) {
-        waitingRoom.get(key).add(connection);
-    }
-
-    @Override
-    public List<WebSocket> getConnectionsOnWaitingRoom(String key) {
-        return waitingRoom.get(key);
-    }
-
-    @Override
-    public void removeKeyOnWaitingRoom(String key) {
-        waitingRoom.remove(key);
-    }
-
-    @Override
-    public void createWaitingRoomByLectureId(String key) {
-        waitingRoom.put(key, new LinkedList<>());
-    }
 }
