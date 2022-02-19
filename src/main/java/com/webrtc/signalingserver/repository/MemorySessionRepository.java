@@ -18,9 +18,6 @@ public class MemorySessionRepository implements SessionRepository{
     // lecture id, session participants
     private final ConcurrentMap<String, List<String>> sessionManager = new ConcurrentHashMap<>();
 
-    // member id, message
-    private final ConcurrentMap<String, String> messageOffer = new ConcurrentHashMap<>();
-
     @Override
     public Boolean containsKeyOnConnections(String key) {
         return connections.containsKey(key);
@@ -46,11 +43,6 @@ public class MemorySessionRepository implements SessionRepository{
     }
 
     @Override
-    public void removeMessageOnMessageOffer(String key) {
-        messageOffer.remove(key);
-    }
-
-    @Override
     public void removeKeyOnConnections(String key) {
         connections.remove(key);
     }
@@ -58,21 +50,6 @@ public class MemorySessionRepository implements SessionRepository{
     @Override
     public void addWebSocketOnConnections(String key, WebSocket socket) {
         connections.put(key, socket);
-    }
-
-    @Override
-    public String getMessageOnMessageOffer(String key) {
-        return messageOffer.get(key);
-    }
-
-    @Override
-    public void addMessageOnMessageOffer(String key, String message) {
-        messageOffer.put(key, message);
-    }
-
-    @Override
-    public Boolean containsKeyOnMessageOffer(String key) {
-        return messageOffer.containsKey(key);
     }
 
     @Override

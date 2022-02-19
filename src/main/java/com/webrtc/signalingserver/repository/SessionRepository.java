@@ -13,12 +13,6 @@ public interface SessionRepository {
     void addWebSocketOnConnections(String key, WebSocket socket);
     void closeConnection(String key);
 
-    // messageOffer
-    String getMessageOnMessageOffer(String key);
-    Boolean containsKeyOnMessageOffer(String key);
-    void addMessageOnMessageOffer(String key, String message);
-    void removeMessageOnMessageOffer(String key);
-
     // sessionManager
     Boolean containsLectureSessionOnSessionManager(String key);
     Boolean containsConnectionOnLectureSession(String lectureId, String key);
