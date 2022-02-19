@@ -133,7 +133,7 @@ public class WebSocketService {
         Lecture lectureToEnter = objectRepository.findLecture(messageObj.lectureId);
         ValidatePermission.validateAccessPermission(member, lectureToEnter);
 
-        List<String> connections = sessionRepository.getSessionsByLectureId(changeLongToString(messageObj.lectureId));
+        List<String> connections = sessionRepository.getConnectionsByLectureId(changeLongToString(messageObj.lectureId));
         List<Long> membersInLecture = new ArrayList<>();
         for (String connection : connections) {
             String[] splited = connection.split(Constants.DELIMITER);
@@ -190,7 +190,7 @@ public class WebSocketService {
             ValidatePermission.validateLecturer(member.getId(), lecture);
             // sessionManager 돌면서 현재 session에 참여하고 있는 user 탐색
             String lectureToString = changeLongToString(lecture.getId());
-            for (String needToRemove : sessionRepository.getSessionsByLectureId(lectureToString)) {
+            for (String needToRemove : sessionRepository.getConnectionsByLectureId(lectureToString)) {
                 removeConnections(needToRemove);
             }
             sessionRepository.removeLectureSessionByLectureId(lectureToString);
@@ -201,7 +201,7 @@ public class WebSocketService {
             if(sessionRepository.containsConnectionOnLectureSession(changeLongToString(messageObj.lectureId), encryptedUser))
                 throw new IllegalArgumentException("접속 정보가 없는 사용자입니다.");
              removeConnections(encryptedUser);
-             sessionRepository.removeSessionOnLecture(changeLongToString(lecture.getId()), encryptedUser);
+             sessionRepository.removeConnectionOnLectureSession(changeLongToString(lecture.getId()), encryptedUser);
 
              Map<String, Object> mapObj = GsonUtil.makeCommonMap("userExited", messageObj.userId, 200);
              sendToAll(messageObj.lectureId, messageObj.userId,  mapObj);
@@ -216,7 +216,7 @@ public class WebSocketService {
 
     private void sendToAll(Long lectureId, Long userId, Map<String, Object> objectMap) {
         String changedValue = changeLongToString(lectureId, userId);
-        for (String target : sessionRepository.getSessionsByLectureId(changeLongToString(lectureId))) {
+        for (String target : sessionRepository.getConnectionsByLectureId(changeLongToString(lectureId))) {
             // 본인을 제외한 모두에게 요청보냄, 컨넥션이 없을 수도 있으니 target 값의 존재 여부 조사 후 전송
             if (!target.equals(changedValue) && sessionRepository.containsKeyOnConnections(target))
                 GsonUtil.commonSendMessage(sessionRepository.getWebSocketOnConnections(target), objectMap);
@@ -225,9 +225,8 @@ public class WebSocketService {
 
     private void startLiveLecture(Long lectureId, Long userId, WebSocket conn) {
         String lectureToString = changeLongToString(lectureId);
-        sessionRepository.addLectureSession(lectureToString);
         String changedValue = changeLongToString(lectureId, userId);
-        sessionRepository.addSessionOnLecture(lectureToString, changedValue);
+        sessionRepository.addConnectionOnLectureSession(lectureToString, changedValue);
         sessionRepository.addWebSocketOnConnections(changedValue, conn);
 
         log.info("강의 세션이 생성되었습니다.");
@@ -238,7 +237,7 @@ public class WebSocketService {
         if(!sessionRepository.containsLectureSessionOnSessionManager(lectureToString)) throw new IllegalArgumentException("현재 진행하지 않는 강의입니다.");
 
         String changedValue = changeLongToString(lectureId, userId);
-        sessionRepository.addSessionOnLecture(lectureToString, changedValue);
+        sessionRepository.addConnectionOnLectureSession(lectureToString, changedValue);
         sessionRepository.addWebSocketOnConnections(changedValue, conn);
         log.info("강의 세션에 참가하였습니다");
     }
@@ -248,7 +247,6 @@ public class WebSocketService {
             sessionRepository.closeConnection(target);
             sessionRepository.removeKeyOnConnections(target);
         }
-        sessionRepository.removeMessageOnMessageOffer(target);
     }
 
 }

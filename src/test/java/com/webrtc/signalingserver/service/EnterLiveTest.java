@@ -77,7 +77,7 @@ public class EnterLiveTest {
         assertThat(sessionRepository.getWebSocketOnConnections(encryptedKey)).isSameAs(studentClient.getConnection());
 
         // 해당 lecture session 에 학생 키 저장되어 있는지 확인
-        assertThat(sessionRepository.getSessionsByLectureId(changeLongToString(lecture.getId())).contains(encryptedKey)).isTrue();
+        assertThat(sessionRepository.getConnectionsByLectureId(changeLongToString(lecture.getId())).contains(encryptedKey)).isTrue();
 
     }
 
