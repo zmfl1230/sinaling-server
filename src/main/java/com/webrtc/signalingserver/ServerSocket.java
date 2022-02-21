@@ -14,12 +14,12 @@ import java.net.InetSocketAddress;
 import java.util.*;
 
 @Slf4j
-public class LectureSession extends WebSocketServer {
+public class ServerSocket extends WebSocketServer {
 
     private Map<String, Method> methodMap = new HashMap<>();
     private WebSocketService webSocketService;
 
-    public LectureSession() {
+    public ServerSocket() {
         super(new InetSocketAddress(8888));
         log.info("소켓 시작");
     }

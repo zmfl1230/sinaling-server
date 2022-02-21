@@ -1,6 +1,6 @@
 package com.webrtc.signalingserver.config;
 
-import com.webrtc.signalingserver.LectureSession;
+import com.webrtc.signalingserver.ServerSocket;
 import com.webrtc.signalingserver.repository.*;
 import com.webrtc.signalingserver.service.TemplateForSynchronized;
 import com.webrtc.signalingserver.service.WebSocketService;
@@ -22,8 +22,8 @@ public class SessionConfig {
     RedisTemplate<String, String> redisTemplate;
 
     @Bean
-    public LectureSession lectureSession() {
-        return new LectureSession();
+    public ServerSocket lectureSession() {
+        return new ServerSocket();
     }
 
     @Bean
