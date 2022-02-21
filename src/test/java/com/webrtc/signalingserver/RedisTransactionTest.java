@@ -6,10 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -26,6 +23,7 @@ public class RedisTransactionTest {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
     private ValueOperations<String, String> valueOperations;
+    private SetOperations<String, String> setOperations;
 
     @Test
     @DisplayName("트랜젝션 적용 - 중간에 값 조사시 null값 나오는지 확인")
@@ -89,7 +87,6 @@ public class RedisTransactionTest {
 
         String key = "test";
         String yet = valueOperations.get(key);
-        redisTemplate.watch(key);
 
         service.submit(() -> {
             redisTransactionLogic(key);
@@ -114,16 +111,66 @@ public class RedisTransactionTest {
     }
 
     private void redisTransactionLogic(String key) {
-        String s = valueOperations.get(key);
-        int value = Integer.parseInt(s != null ? s : "0");
         redisTemplate.execute(new SessionCallback<List<Object>>() {
             public List<Object> execute(RedisOperations operations) throws DataAccessException {
+                String s = valueOperations.get(key);
+                int value = Integer.parseInt(s != null ? s : "0");
+
+                redisTemplate.watch(key);
                 operations.multi();
 
                 valueOperations.set(key, Integer.toString(value+ 1));
 
                 // This will contain the results of all operations in the transaction
                 return operations.exec();
+            }
+        });
+    }
+
+
+    @Test
+    @DisplayName("SessionCallback을 사용해 여러 클라이언트로부터 동시 요청시, 데이터 유실 피하기")
+    public void testTransaction4() throws InterruptedException {
+        setOperations = redisTemplate.opsForSet();
+        //When
+        int numberOfThreads = 2;
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        String key = "testSet";
+        Long before = setOperations.size(key);
+
+
+        service.submit(() -> {
+            redisSetTransactionLogic(key);
+            latch.countDown();
+        });
+
+        service.submit(() -> {
+            redisSetTransactionLogic(key);
+            latch.countDown();
+        });
+
+        latch.await();
+
+        // Then
+        Long after = setOperations.size(key);
+        Assertions.assertThat(after).isEqualTo(before+numberOfThreads);
+
+    }
+
+    @Transactional
+    public void redisSetTransactionLogic(String key) {
+        redisTemplate.execute(new SessionCallback<List<Object>>() {
+            public List<Object> execute(RedisOperations operations) throws DataAccessException {
+
+                operations.multi();
+
+                setOperations.add(key, String.valueOf(this));
+                System.out.println("this.toString() = " + this);
+
+                return operations.exec();
+
             }
         });
     }
