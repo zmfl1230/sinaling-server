@@ -1,6 +1,6 @@
 package com.webrtc.signalingserver.service;
 
-import com.webrtc.signalingserver.TestWebSocketClient;
+import com.webrtc.signalingserver.WebSocketClientStub;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
@@ -9,12 +9,10 @@ import com.webrtc.signalingserver.repository.MemoryRepository;
 import com.webrtc.signalingserver.repository.MemorySessionRepository;
 import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
-import org.assertj.core.api.Assertions;
 import org.java_websocket.client.WebSocketClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.scheduling.annotation.Async;
 
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
@@ -65,10 +63,10 @@ class EnterWaitingRoomTest {
     public void enterWaitingRoomBeforeLiveStarted() throws Exception {
         //Given
         LiveRequestDto enterWaitingRoom = LiveRequestDto.buildBasicDto("enterWaitingRoom", student.getId(), lecture.getId(), null);
-        client = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
 
         LiveRequestDto enterWaitingRoom1 = LiveRequestDto.buildBasicDto("enterWaitingRoom", student1.getId(), lecture.getId(), null);
-        client1 = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        client1 = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
 
         //When
         webSocketService.enterWaitingRoom(client.getConnection(), enterWaitingRoom);
@@ -94,13 +92,13 @@ class EnterWaitingRoomTest {
 
         //Given
         // start live
-        teacherClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        teacherClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher.getId(), lecture.getId(), null);
         webSocketService.startLive(teacherClient.getConnection(), startLive);
 
         // 강의 생성 대기실 접속 요청
         LiveRequestDto enterWaitingRoom = LiveRequestDto.buildBasicDto("enterWaitingRoom", student.getId(), lecture.getId(), null);
-        client = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
 
         //When
         webSocketService.enterWaitingRoom(client.getConnection(), enterWaitingRoom);
@@ -153,14 +151,14 @@ class EnterWaitingRoomTest {
     }
 
     void createLectureLive() {
-        teacherClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        teacherClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher.getId(), lecture.getId(), null);
         webSocketService.startLive(teacherClient.getConnection(), startLive);
     }
 
     void enterWaitingRoom(Long studentId) {
         LiveRequestDto enterWaitingRoom = LiveRequestDto.buildBasicDto("enterWaitingRoom", studentId, lecture.getId(), null);
-        client = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         webSocketService.enterWaitingRoom(client.getConnection(), enterWaitingRoom);
     }
 

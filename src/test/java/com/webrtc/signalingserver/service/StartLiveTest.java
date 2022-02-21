@@ -1,6 +1,6 @@
 package com.webrtc.signalingserver.service;
 
-import com.webrtc.signalingserver.TestWebSocketClient;
+import com.webrtc.signalingserver.WebSocketClientStub;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
@@ -38,7 +38,7 @@ public class StartLiveTest {
 
     @BeforeEach
     public void setUpObject() {
-        client = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
 
         objectRepository = new MemoryRepository();
         sessionRepository = new MemorySessionRepository();

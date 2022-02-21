@@ -1,6 +1,6 @@
 package com.webrtc.signalingserver.service;
 
-import com.webrtc.signalingserver.TestWebSocketClient;
+import com.webrtc.signalingserver.WebSocketClientStub;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
@@ -50,7 +50,7 @@ class IsLiveProceedingTest {
     @DisplayName("라이브 진행 중인 아닌경우, 라이브 진행 여부 요청시, false")
     void isNotLiveProceeding() {
         //  check isLiveProceeding
-        client = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto isLiveProceeding = LiveRequestDto.buildBasicDto("isLiveProceeding", student.getId(), lecture.getId(), null);
         webSocketService.isLiveProceeding(client.getConnection(), isLiveProceeding);
     }
@@ -60,12 +60,12 @@ class IsLiveProceedingTest {
     void isLiveProceeding() {
         //  check isLiveProceeding
         // start live
-        WebSocketClient teacherClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        WebSocketClient teacherClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher.getId(), lecture.getId(), null);
         webSocketService.startLive(teacherClient.getConnection(), startLive);
 
         //  check isLiveProceeding
-        client = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto isLiveProceeding = LiveRequestDto.buildBasicDto("isLiveProceeding", student.getId(), lecture.getId(), null);
         webSocketService.isLiveProceeding(client.getConnection(), isLiveProceeding);
     }

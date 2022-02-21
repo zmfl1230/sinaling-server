@@ -1,6 +1,6 @@
 package com.webrtc.signalingserver.service;
 
-import com.webrtc.signalingserver.TestWebSocketClient;
+import com.webrtc.signalingserver.WebSocketClientStub;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
@@ -55,7 +55,7 @@ public class EnterLiveTest {
         objectRepository.saveLecture(lecture);
 
         // start live
-        teacherClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        teacherClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher.getId(), lecture.getId(), null);
         webSocketService.startLive(teacherClient.getConnection(), startLive);
     }
@@ -67,7 +67,7 @@ public class EnterLiveTest {
         LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterLive", student1.getId(), lecture.getId(), null);
 
         //When
-        studentClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        studentClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         webSocketService.enterLive(studentClient.getConnection(), enterLive);
 
         //Then
@@ -89,7 +89,7 @@ public class EnterLiveTest {
         LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterLive", student2.getId(), lecture.getId(), null);
 
         //When
-        studentClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        studentClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
 
         //Then
         Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.enterLive(studentClient.getConnection(), enterLive));
@@ -103,7 +103,7 @@ public class EnterLiveTest {
         LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterLive", student1.getId(), lecture1.getId(), null);
 
         //When
-        studentClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        studentClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
 
         //Then
         Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.enterLive(studentClient.getConnection(), enterLive));

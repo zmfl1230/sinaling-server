@@ -1,6 +1,6 @@
 package com.webrtc.signalingserver.service;
 
-import com.webrtc.signalingserver.TestWebSocketClient;
+import com.webrtc.signalingserver.WebSocketClientStub;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
@@ -62,11 +62,11 @@ public class ExitLiveTest {
         objectRepository.saveLecture(lecture1);
 
         // start live
-        teacherClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        teacherClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto startLive1 = LiveRequestDto.buildBasicDto("startLive", teacher1.getId(), lecture.getId(), null);
         webSocketService.startLive(teacherClient.getConnection(), startLive1);
 
-        teacherClient = new TestWebSocketClient(URI.create("ws://localhost:8888/"));
+        teacherClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         LiveRequestDto startLive2 = LiveRequestDto.buildBasicDto("startLive", teacher1.getId(), lecture1.getId(), null);
         webSocketService.startLive(teacherClient.getConnection(), startLive2);
     }
@@ -80,12 +80,12 @@ public class ExitLiveTest {
         //given
         for (Member student : lecture.getStudents()) {
             LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterLive", student.getId(), lecture.getId(), null);
-            webSocketService.enterLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
+            webSocketService.enterLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
         }
 
         //when
         LiveRequestDto exitLive = LiveRequestDto.buildBasicDto("exitLive", lecture.getLecturer().getId(), lecture.getId(), null);
-        webSocketService.exitLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), exitLive);
+        webSocketService.exitLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), exitLive);
 
         //then
         // lectureSession에서 해당 강의 제거되었는지 확인
@@ -109,14 +109,14 @@ public class ExitLiveTest {
         //given
         for (Member student : lecture.getStudents()) {
             LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterLive", student.getId(), lecture.getId(), null);
-            webSocketService.enterLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
+            webSocketService.enterLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
         }
 
         //when
         LiveRequestDto exitLive = LiveRequestDto.buildBasicDto("exitLive", teacher2.getId(), lecture.getId(), null);
 
         //then
-        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.exitLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), exitLive) );
+        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.exitLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), exitLive) );
 
     }
 
@@ -127,12 +127,12 @@ public class ExitLiveTest {
         //given
         for (Member student : lecture1.getStudents()) {
             LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterLive", student.getId(), lecture1.getId(), null);
-            webSocketService.enterLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
+            webSocketService.enterLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
         }
 
         //when
         LiveRequestDto exitLive = LiveRequestDto.buildBasicDto("exitLive", teacher2.getId(), lecture1.getId(), null);
-        webSocketService.exitLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), exitLive);
+        webSocketService.exitLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), exitLive);
 
         //then
         // lectureSession에서 해당 강의가 아직 존재하는지 확인(삭제되면 안됨)
@@ -156,12 +156,12 @@ public class ExitLiveTest {
         //given
         for (Member student : lecture.getStudents()) {
             LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterLive", student.getId(), lecture.getId(), null);
-            webSocketService.enterLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
+            webSocketService.enterLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), enterLive);
         }
 
         //when
         LiveRequestDto exitLive = LiveRequestDto.buildBasicDto("exitLive", student1.getId(), lecture.getId(), null);
-        webSocketService.exitLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), exitLive);
+        webSocketService.exitLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), exitLive);
 
         //then
         // lectureSession에서 해당 강의가 아직 존재하는지 확인(삭제되면 안됨)
@@ -184,7 +184,7 @@ public class ExitLiveTest {
         LiveRequestDto exitLive = LiveRequestDto.buildBasicDto("exitLive", student1.getId(), lecture1.getId(), null);
 
         //then
-        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.exitLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), exitLive) );
+        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.exitLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), exitLive) );
 
     }
 
@@ -196,7 +196,7 @@ public class ExitLiveTest {
         LiveRequestDto exitLive = LiveRequestDto.buildBasicDto("exitLive", student1.getId(), lecture1.getId(), null);
 
         //then
-        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.exitLive(new TestWebSocketClient(URI.create("ws://localhost:8888/")).getConnection(), exitLive) );
+        Assertions.assertThrows(IllegalArgumentException.class, () -> webSocketService.exitLive(new WebSocketClientStub(URI.create("ws://localhost:8888/")).getConnection(), exitLive) );
 
     }
 }
