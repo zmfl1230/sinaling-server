@@ -198,7 +198,7 @@ public class WebSocketService {
         // 수강생 강의 종료
         else {
              String encryptedUser = changeLongToString(messageObj.lectureId, messageObj.userId);
-            if(sessionRepository.containsConnectionOnLectureSession(changeLongToString(messageObj.lectureId), encryptedUser))
+            if(!sessionRepository.containsConnectionOnLectureSession(changeLongToString(messageObj.lectureId), encryptedUser))
                 throw new IllegalArgumentException("접속 정보가 없는 사용자입니다.");
              removeConnections(encryptedUser);
              sessionRepository.removeConnectionOnLectureSession(changeLongToString(lecture.getId()), encryptedUser);
