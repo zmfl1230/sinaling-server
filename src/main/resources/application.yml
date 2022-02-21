@@ -22,3 +22,4 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
+    org.springframework.transaction.interceptor: TRACE
