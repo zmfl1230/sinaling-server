@@ -17,11 +17,9 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 
 class IsLiveProceedingTest {
-    WebSocketClient client;
     ObjectRepository objectRepository;
     SessionRepository sessionRepository;
-    WebSocketService webSocketService;
-    TemplateForSynchronized template;
+    CommonRequest commonRequest;
 
     Member teacher;
     Member student;
@@ -31,8 +29,8 @@ class IsLiveProceedingTest {
     public void setUp() {
         objectRepository = new MemoryRepository();
         sessionRepository = new MemorySessionRepository();
-        template = new TemplateForSynchronized();
-        webSocketService = new WebSocketService(objectRepository, sessionRepository, template);
+
+        commonRequest = new CommonRequest(objectRepository, sessionRepository);
 
         teacher = new Member(1L, "teacher", MemberRole.LECTURER);
         student = new Member(2L, "student1", MemberRole.STUDENT);
@@ -50,9 +48,7 @@ class IsLiveProceedingTest {
     @DisplayName("라이브 진행 중인 아닌경우, 라이브 진행 여부 요청시, false")
     void isNotLiveProceeding() {
         //  check isLiveProceeding
-        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
-        LiveRequestDto isLiveProceeding = LiveRequestDto.buildBasicDto("isLiveProceeding", student.getId(), lecture.getId(), null);
-        webSocketService.isLiveProceeding(client.getConnection(), isLiveProceeding);
+        commonRequest.isLiveProceeding(student.getId(), lecture.getId());
     }
 
     @Test
@@ -60,13 +56,9 @@ class IsLiveProceedingTest {
     void isLiveProceeding() {
         //  check isLiveProceeding
         // start live
-        WebSocketClient teacherClient = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
-        LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", teacher.getId(), lecture.getId(), null);
-        webSocketService.startLive(teacherClient.getConnection(), startLive);
+        commonRequest.startLive(teacher.getId(), lecture.getId());
 
         //  check isLiveProceeding
-        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
-        LiveRequestDto isLiveProceeding = LiveRequestDto.buildBasicDto("isLiveProceeding", student.getId(), lecture.getId(), null);
-        webSocketService.isLiveProceeding(client.getConnection(), isLiveProceeding);
+        commonRequest.isLiveProceeding(student.getId(), lecture.getId());
     }
 }
