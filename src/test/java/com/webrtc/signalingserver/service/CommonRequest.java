@@ -2,8 +2,6 @@ package com.webrtc.signalingserver.service;
 
 import com.webrtc.signalingserver.WebSocketClientStub;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
-import com.webrtc.signalingserver.repository.MemoryRepository;
-import com.webrtc.signalingserver.repository.MemorySessionRepository;
 import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
 import org.java_websocket.WebSocket;
@@ -33,29 +31,29 @@ public class CommonRequest {
         return client.getConnection();
     }
 
-    void startLive(Long memberId, Long lectureId) {
+    public void startLive(Long memberId, Long lectureId) {
         LiveRequestDto startLive = LiveRequestDto.buildBasicDto("startLive", memberId, lectureId, null);
         webSocketService.startLive(client.getConnection(), startLive);
     }
 
-    void enterWaitingRoom(Long memberId, Long lectureId) {
+    public void enterWaitingRoom(Long memberId, Long lectureId) {
         LiveRequestDto enterWaitingRoom = LiveRequestDto.buildBasicDto("enterWaitingRoom", memberId, lectureId, null);
         webSocketService.enterWaitingRoom(client.getConnection(), enterWaitingRoom);
     }
 
-    void enterLive(Long memberId, Long lectureId) {
+    public void enterLive(Long memberId, Long lectureId) {
         LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterWaitingRoom", memberId, lectureId, null);
         client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
         webSocketService.enterLive(client.getConnection(), enterLive);
     }
 
 
-    void exitLive(Long memberId, Long lectureId) {
+    public void exitLive(Long memberId, Long lectureId) {
         LiveRequestDto exitLive = LiveRequestDto.buildBasicDto("exitLive", memberId, lectureId, null);
         webSocketService.exitLive(client.getConnection(), exitLive);
     }
 
-    void isLiveProceeding(Long memberId, Long lectureId) {
+    public void isLiveProceeding(Long memberId, Long lectureId) {
         LiveRequestDto isLiveProceeding = LiveRequestDto.buildBasicDto("isLiveProceeding", memberId, lectureId, null);
         webSocketService.isLiveProceeding(client.getConnection(), isLiveProceeding);
     }
