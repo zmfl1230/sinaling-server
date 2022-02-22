@@ -185,7 +185,7 @@ public class WebSocketService {
         ValidatePermission.validateAccessPermission(member, lecture);
 
         // 강사의 강의 종료
-        if(member.getRole() == MemberRole.LECTURER && !lecture.contains(member)) {
+        if(member.getRole() == MemberRole.LECTURER && lecture.getLecturer().getId().equals(member.getId())) {
             // 강사와 요청 멤버가 동일한 인물인지 검증
             ValidatePermission.validateLecturer(member.getId(), lecture);
             // sessionManager 돌면서 현재 session에 참여하고 있는 user 탐색
