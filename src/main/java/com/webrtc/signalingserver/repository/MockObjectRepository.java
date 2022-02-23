@@ -6,7 +6,7 @@ import com.webrtc.signalingserver.domain.entity.Member;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MemoryRepository implements ObjectRepository {
+public class MockObjectRepository implements ObjectRepository {
 
     Map<Long, Member> members = new HashMap<>();
     Map<Long, Lecture> lectures = new HashMap<>();

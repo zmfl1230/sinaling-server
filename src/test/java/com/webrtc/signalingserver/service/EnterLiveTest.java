@@ -3,8 +3,8 @@ package com.webrtc.signalingserver.service;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
 import com.webrtc.signalingserver.domain.entity.MemberRole;
-import com.webrtc.signalingserver.repository.MemoryRepository;
-import com.webrtc.signalingserver.repository.MemorySessionRepository;
+import com.webrtc.signalingserver.repository.MockObjectRepository;
+import com.webrtc.signalingserver.repository.MockSessionRepository;
 import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
 import org.junit.jupiter.api.Assertions;
@@ -29,8 +29,8 @@ public class EnterLiveTest {
 
     @BeforeEach
     public void setUp() {
-        objectRepository = new MemoryRepository();
-        sessionRepository = new MemorySessionRepository();
+        objectRepository = new MockObjectRepository();
+        sessionRepository = new MockSessionRepository();
 
         commonRequest = new CommonRequest(objectRepository, sessionRepository);
 

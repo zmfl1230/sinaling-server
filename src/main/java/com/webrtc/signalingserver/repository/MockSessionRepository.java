@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class MemorySessionRepository extends SessionManagerRepository {
+public class MockSessionRepository extends SessionManagerRepository {
 
     // lecture id, session participants
     private final ConcurrentMap<String, List<String>> sessionManager = new ConcurrentHashMap<>();
