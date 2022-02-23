@@ -6,6 +6,7 @@ import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -25,6 +26,17 @@ public class CommonRequest {
         this.sessionRepository = sessionRepository;
         template = new TemplateForSynchronized();
         webSocketService = new WebSocketService(objectRepository, sessionRepository, template);
+    }
+
+    @Autowired
+    public CommonRequest(ObjectRepository objectRepository, SessionRepository sessionRepository,
+                         TemplateForSynchronized templateForSynchronized, WebSocketService webSocketService) {
+        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
+
+        this.objectRepository = objectRepository;
+        this.sessionRepository = sessionRepository;
+        this.template = templateForSynchronized;
+        this.webSocketService = webSocketService;
     }
 
     WebSocket getConnection() {
