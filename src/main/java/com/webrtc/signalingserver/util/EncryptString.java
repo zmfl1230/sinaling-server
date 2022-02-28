@@ -46,7 +46,7 @@ public class EncryptString {
     }
 
     public static String changeLongToString(Long arg1, Long arg2) {
-        return arg1 + Constants.DELIMITER +Long.toString(arg2);
+        return arg1 + Constants.DELIMITER + arg2;
     }
 
     public static String changeLongToString(Long arg) {
