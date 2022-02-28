@@ -32,9 +32,8 @@ public class SynchronizedTest {
     @Transactional
     public void setUp() {
         /**
-         * 스레드를 생성해서 돌리면 다른 컨넥션을 공유하기때문에 실제로 테스트 데이터 값을 디비에 저장하지 않는 이상,
+         * 스레드를 생성해서 돌리면 컨넥션을 공유하지않기 때문에 실제로 테스트 데이터 값을 디비에 저장하지 않는 이상,
          * 권한 에러 발생(디비엔 실제로 테스트를 위해 생성한 엔티티의 값이 저장되지 않는다.)
-         * 아니면 엔티티 생성 후, 디비 반영을 위해 flush를 직접 해줘야 한다.
          *
          * 고로 실제에 디비에 아래 아이디를 갖는 데이터가 있음을 가정하고, 테스트를 진행한다.
          * */
@@ -71,8 +70,6 @@ public class SynchronizedTest {
     @Test
     @Transactional
     public void enterLiveSynchronizedTest() throws InterruptedException {
-        objectRepository.saveMember(teacher);
-        objectRepository.saveLecture(lecture);
 
         commonRequest.startLive(teacher.getId(), lecture.getId());
 
