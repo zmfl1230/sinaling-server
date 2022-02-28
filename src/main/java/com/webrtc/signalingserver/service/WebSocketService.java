@@ -4,7 +4,6 @@ import com.webrtc.signalingserver.Constants;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.domain.entity.Lecture;
 import com.webrtc.signalingserver.domain.entity.Member;
-import com.webrtc.signalingserver.domain.entity.MemberRole;
 import com.webrtc.signalingserver.exception.ValidatePermission;
 import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
@@ -46,9 +45,8 @@ public class WebSocketService {
     }
 
     public void enterWaitingRoom(WebSocket socket, LiveRequestDto messageObj) {
-        Member member = objectRepository.findMember(messageObj.userId);
+        validateAccessPermission(messageObj.lectureId, messageObj.userId);
         Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
-        ValidatePermission.validateAccessPermission(member, lecture);
 
         NeedToSynchronized executingLogic = () -> {
             // SessionManager에 해당 강의 Id가 키로 있는지 조사(요청 시점에 강의가 생성되었을 수도 있으니)
@@ -66,6 +64,11 @@ public class WebSocketService {
 
             } else{
                 // 없는 경우
+                try{
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    System.out.println("e = " + e);
+                }
                 // waiting room 이 없으면 생성
                 if(!sessionRepository.containsKeyOnWaitingRoom(changeLongToString(lecture.getId()))) sessionRepository.createWaitingRoomByLectureId(changeLongToString(lecture.getId()));
                 // 해당 컬렉션에 본인 커넥션 추가
@@ -83,8 +86,7 @@ public class WebSocketService {
     }
 
     public void startLive(WebSocket socket, LiveRequestDto messageObj) {
-        Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
-        ValidatePermission.validateLecturer(messageObj.userId, lecture);
+        validateLecturer(messageObj.lectureId, messageObj.userId);
 
         NeedToSynchronized executingLogic = () -> {
             startLiveLecture(messageObj.lectureId, messageObj.userId, socket);
@@ -112,10 +114,8 @@ public class WebSocketService {
     }
 
     public void enterLive(WebSocket socket, LiveRequestDto messageObj) {
-        Member member = objectRepository.findMember(messageObj.userId);
-        Lecture lectureToEnter = objectRepository.findLecture(messageObj.lectureId);
+        validateAccessPermission(messageObj.lectureId, messageObj.userId);
 
-        ValidatePermission.validateAccessPermission(member, lectureToEnter);
         enterLiveLecture(messageObj.lectureId, messageObj.userId, socket);
 
         Map<String, Object> objectMap = GsonUtil.makeCommonMap("enterLive", messageObj.userId, 200);
@@ -129,9 +129,7 @@ public class WebSocketService {
     }
 
     public void getConnectionsOnLecture(WebSocket socket, LiveRequestDto messageObj) {
-        Member member = objectRepository.findMember(messageObj.userId);
-        Lecture lectureToEnter = objectRepository.findLecture(messageObj.lectureId);
-        ValidatePermission.validateAccessPermission(member, lectureToEnter);
+        validateAccessPermission(messageObj.lectureId, messageObj.userId);
 
         List<String> connections = sessionRepository.getConnectionsByLectureId(changeLongToString(messageObj.lectureId));
         List<Long> membersInLecture = new ArrayList<>();
@@ -178,18 +176,15 @@ public class WebSocketService {
 
 
     public void exitLive(WebSocket socket, LiveRequestDto messageObj) {
-        Lecture lecture = objectRepository.findLecture(messageObj.lectureId);
-        Member member = objectRepository.findMember(messageObj.userId);
-
         // 해당 멤버가 lecture 관련 회원인지 검증(강의자, 수강자)
-        ValidatePermission.validateAccessPermission(member, lecture);
+        validateAccessPermission(messageObj.lectureId, messageObj.userId);
 
         // 강사의 강의 종료
-        if(member.getRole() == MemberRole.LECTURER && lecture.getLecturer().getId().equals(member.getId())) {
+        if(objectRepository.checkIfUserIsLecturerInLecture(messageObj.lectureId, messageObj.userId)) {
             // 강사와 요청 멤버가 동일한 인물인지 검증
-            ValidatePermission.validateLecturer(member.getId(), lecture);
+            validateLecturer(messageObj.lectureId, messageObj.userId);
             // sessionManager 돌면서 현재 session에 참여하고 있는 user 탐색
-            String lectureToString = changeLongToString(lecture.getId());
+            String lectureToString = changeLongToString(messageObj.lectureId);
             for (String needToRemove : sessionRepository.getConnectionsByLectureId(lectureToString)) {
                 removeConnections(needToRemove);
             }
@@ -201,7 +196,7 @@ public class WebSocketService {
             if(!sessionRepository.containsConnectionOnLectureSession(changeLongToString(messageObj.lectureId), encryptedUser))
                 throw new IllegalArgumentException("접속 정보가 없는 사용자입니다.");
              removeConnections(encryptedUser);
-             sessionRepository.removeConnectionOnLectureSession(changeLongToString(lecture.getId()), encryptedUser);
+             sessionRepository.removeConnectionOnLectureSession(changeLongToString(messageObj.lectureId), encryptedUser);
 
              Map<String, Object> mapObj = GsonUtil.makeCommonMap("userExited", messageObj.userId, 200);
              sendToAll(messageObj.lectureId, messageObj.userId,  mapObj);
@@ -248,5 +243,18 @@ public class WebSocketService {
             sessionRepository.removeKeyOnConnections(target);
         }
     }
+
+    // 권한 검증
+    private void validateAccessPermission(Long lectureId, Long userId) {
+        Lecture lecture = objectRepository.findLecture(lectureId);
+        Member member = objectRepository.findMember(userId);
+        ValidatePermission.validateAccessPermission(member, lecture);
+    }
+
+    private void validateLecturer(Long lectureId, Long userId) {
+        Lecture lecture = objectRepository.findLecture(lectureId);
+        ValidatePermission.validateLecturer(userId, lecture);
+    }
+
 
 }
