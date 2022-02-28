@@ -30,4 +30,9 @@ public class MockObjectRepository implements ObjectRepository {
     public Member findMember(Long memberId) {
         return members.get(memberId);
     }
+
+    @Override
+    public Boolean checkIfUserIsLecturerInLecture(Long lectureId, Long memberId) {
+        return lectures.get(lectureId).getLecturer().getId().equals(memberId);
+    }
 }

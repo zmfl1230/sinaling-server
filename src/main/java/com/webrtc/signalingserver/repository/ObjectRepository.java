@@ -9,4 +9,6 @@ public interface ObjectRepository {
     void saveMember(Member member);
     Lecture findLecture(Long lectureId);
     Member findMember(Long memberId);
+
+    Boolean checkIfUserIsLecturerInLecture(Long lectureId, Long memberId);
 }

@@ -30,4 +30,9 @@ public class JpaRepository implements ObjectRepository {
     public Member findMember(Long memberId) {
         return entityManager.find(Member.class, memberId);
     }
+
+    @Override
+    public Boolean checkIfUserIsLecturerInLecture(Long lectureId, Long memberId) {
+        return findLecture(lectureId).getLecturer().getId().equals(memberId);
+    }
 }
