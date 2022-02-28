@@ -1,13 +1,14 @@
 package com.webrtc.signalingserver.util;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class GsonUtil{
 
     private static final Gson gson = new Gson();
@@ -36,7 +37,7 @@ public class GsonUtil{
         try {
             socket.send(encode(keyValue));
         } catch (WebsocketNotConnectedException e) {
-            System.out.println("e = " + e);
+            log.info("e = {}, type = {}", e, keyValue.get("type"));
         }
     }
 
