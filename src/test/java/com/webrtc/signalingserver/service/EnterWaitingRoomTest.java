@@ -90,14 +90,23 @@ class EnterWaitingRoomTest {
 
     }
 
+    /**
+     * 정확한 처리를 위해 대기실 입장 시점에 Thread.sleep(100) 으로 설정해두고 테스트 한다.
+     * @throws Exception
+     */
     // 대기실 입장, 라이브 시작 간 동기화 실현
     @Test
     @DisplayName("스레드를 이용한 동기화 처리 확인, 최종적으로 대기실이 비어있어야 함")
     public void checkSynchronizedBetweenEnterWaitingRoomAndStartLive() throws Exception {
         //When
-        int numberOfThreads = 6;
+        int numberOfThreads = 10;
         ExecutorService service = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        service.submit(() -> {
+            commonRequest.startLive(teacher.getId(), lecture.getId());
+            latch.countDown();
+        });
 
         service.submit(() -> {
             commonRequest.enterWaitingRoom(student1.getId(), lecture.getId());
@@ -120,7 +129,19 @@ class EnterWaitingRoomTest {
             latch.countDown();
         });
         service.submit(() -> {
-            commonRequest.startLive(teacher.getId(), lecture.getId());
+            commonRequest.enterWaitingRoom(student1.getId(), lecture.getId());
+            latch.countDown();
+        });
+        service.submit(() -> {
+            commonRequest.enterWaitingRoom(student1.getId(), lecture.getId());
+            latch.countDown();
+        });
+        service.submit(() -> {
+            commonRequest.enterWaitingRoom(student1.getId(), lecture.getId());
+            latch.countDown();
+        });
+        service.submit(() -> {
+            commonRequest.enterWaitingRoom(student1.getId(), lecture.getId());
             latch.countDown();
         });
 
