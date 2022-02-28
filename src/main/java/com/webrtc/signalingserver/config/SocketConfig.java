@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Slf4j
 @Configuration
-public class SessionConfig {
+public class SocketConfig {
     @Autowired
     RedisTemplate<String, String> redisTemplate;
 

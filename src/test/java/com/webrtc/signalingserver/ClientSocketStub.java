@@ -7,9 +7,9 @@ import javax.websocket.*;
 import java.net.URI;
 
 @ClientEndpoint
-public class WebSocketClientStub extends WebSocketClient {
+public class ClientSocketStub extends WebSocketClient {
 
-    public WebSocketClientStub(URI endpointURI) {
+    public ClientSocketStub(URI endpointURI) {
         super(endpointURI);
         try {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();

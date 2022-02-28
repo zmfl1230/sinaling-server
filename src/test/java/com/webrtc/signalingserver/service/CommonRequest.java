@@ -1,6 +1,6 @@
 package com.webrtc.signalingserver.service;
 
-import com.webrtc.signalingserver.WebSocketClientStub;
+import com.webrtc.signalingserver.ClientSocketStub;
 import com.webrtc.signalingserver.domain.dto.LiveRequestDto;
 import com.webrtc.signalingserver.repository.ObjectRepository;
 import com.webrtc.signalingserver.repository.SessionRepository;
@@ -20,7 +20,7 @@ public class CommonRequest {
     TemplateForSynchronized template;
 
     public CommonRequest(ObjectRepository objectRepository, SessionRepository sessionRepository) {
-        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
+        client = new ClientSocketStub(URI.create("ws://localhost:8888/"));
 
         this.objectRepository = objectRepository;
         this.sessionRepository = sessionRepository;
@@ -31,7 +31,7 @@ public class CommonRequest {
     @Autowired
     public CommonRequest(ObjectRepository objectRepository, SessionRepository sessionRepository,
                          TemplateForSynchronized templateForSynchronized, WebSocketService webSocketService) {
-        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
+        client = new ClientSocketStub(URI.create("ws://localhost:8888/"));
 
         this.objectRepository = objectRepository;
         this.sessionRepository = sessionRepository;
@@ -55,7 +55,7 @@ public class CommonRequest {
 
     public void enterLive(Long memberId, Long lectureId) {
         LiveRequestDto enterLive = LiveRequestDto.buildBasicDto("enterWaitingRoom", memberId, lectureId, null);
-        client = new WebSocketClientStub(URI.create("ws://localhost:8888/"));
+        client = new ClientSocketStub(URI.create("ws://localhost:8888/"));
         webSocketService.enterLive(client.getConnection(), enterLive);
     }
 
